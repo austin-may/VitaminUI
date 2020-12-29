@@ -1,9 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Select, FormControl, InputLabel, Container } from "@material-ui/core";
 import InventoryRenderProps, { InventoryImage } from "./InventoryRenderProps";
 import InventoryItem from "./InventoryItem";
 import InventorySearchBar from "./InventorySearchBar";
-
 
 
 export default function Inventory() {
@@ -14,6 +13,40 @@ export default function Inventory() {
     }
 
     const [searchQuery, setSearchQuery] = useState("");
+    const [inventory, setInventory] = useState([""]);
+    const axios = require('axios');
+
+    async function getInventoryAsync(): Promise<any> {
+        return await axios({
+            url: 'http://localhost:8080/query',
+            method: 'post',
+            data: {
+                query: `
+                query getInventory {
+                    inventory {
+                        Name,
+                        Count,
+                        InventoryVitamin {
+                            VitaminId,
+                            PercentDailyValue
+                        }
+                    }
+                }
+            `
+            }
+        })
+    }
+
+    useEffect(() => {
+        const fetchData = async () => {
+            const response = await getInventoryAsync();
+            let inventoryNames: any[] = response.data.data.inventory;
+            let names = inventoryNames.map((x: any) => x.Name);
+            console.log(names);
+            setInventory(names);
+        }
+        fetchData();
+    }, [])
 
     return (
         <Container maxWidth="lg">
@@ -35,7 +68,7 @@ export default function Inventory() {
                     return (
                         <div>
                             {inventoryImages.filter((image: InventoryImage) => {
-                                return image.name.includes(searchQuery.toLowerCase())
+                                return image.name.includes(searchQuery.toLowerCase()) && inventory.includes(image.name)
                             })
                                 .map((inventoryImage: InventoryImage) => {
                                     return <InventoryItem inventoryImage={inventoryImage} />

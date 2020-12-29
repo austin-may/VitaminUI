@@ -12,7 +12,7 @@ export default function InventoryRenderProps(props: any) {
         },
         {
             imageSrc: 'images/carrot.jpg',
-            name: 'carrot'
+            name: 'carrots'
         },
         {
             imageSrc: 'images/kale.jpg',
