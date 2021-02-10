@@ -1,6 +1,6 @@
-//Obsolete: This is to show the HOC abstraction pattern, but deferring in favor of the Render Props pattern
+//Obsolete: This is to show the HOC abstraction pattern
 
-import Inventory from "./Inventory"
+import Inventory from "../inventory"
 
 function withData(maxInventoryToShow: number) {
     return function (Component: any) {

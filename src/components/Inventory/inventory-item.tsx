@@ -1,4 +1,4 @@
-import { InventoryImage } from "./InventoryRenderProps";
+import { InventoryImage } from "../../models/inventory-models";
 
 export default function InventoryItem(props: { inventoryImage: InventoryImage }) {
     return (

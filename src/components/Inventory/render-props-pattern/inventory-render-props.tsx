@@ -1,9 +1,6 @@
-//Render props allows us separation of concerns so we can keep the static data separate from the logic that imposes upon it
-export interface InventoryImage {
-    imageSrc: string,
-    name: string
-}
+import { InventoryImage } from "../../../models/inventory-models";
 
+//Render props allows us separation of concerns so we can keep the static data separate from the logic that imposes upon it
 export default function InventoryRenderProps(props: any) {
     const inventoryImages: InventoryImage[] = [
         {
