@@ -3,9 +3,16 @@ import { Reducer } from "react"
 
 export const inventoryReducer: Reducer<any, any> = (state: any = {}, action: any = {}) => {
     switch (action.type) {
-        case actionTypes.CREATE_INVENTORY:
-            console.log(state, action);
-            return [...state, { ...action.inventoryState.inventory }]
+        case actionTypes.ADD_INVENTORY:
+            return {
+                ...action,
+                status: actionTypes.REQUEST_STATUS.LOADING
+            }
+        case actionTypes.ADD_INVENTORY_SUCCESS:
+            return {
+                inventory: action.inventoryState.inventory,
+                status: actionTypes.REQUEST_STATUS.SUCCESS
+            }
         case actionTypes.LOAD_INVENTORY:
             return {
                 inventory: action,
@@ -16,6 +23,7 @@ export const inventoryReducer: Reducer<any, any> = (state: any = {}, action: any
                 inventory: action.inventoryState.inventory,
                 status: actionTypes.REQUEST_STATUS.SUCCESS
             };
+        case actionTypes.ADD_INVENTORY_FAILURE:
         case actionTypes.LOAD_INVENTORY_FAILURE:
             return {
                 error: action.err,

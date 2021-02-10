@@ -22,3 +22,25 @@ export async function getInventoryAsync(): Promise<any> {
         }
     })
 }
+
+export async function createInventoryAsync(name: string): Promise<any> {
+    const axios = require('axios');
+    return await axios.post('http://localhost:8080/query', {
+        query: `
+                mutation AddInventory($newInventory: NewInventory!) {
+                    createInventory(input: $newInventory) {
+                        InventoryId
+                    }
+                }
+            `,
+        variables: {
+            'newInventory': {
+                'Name': name,
+                'Count': 100,
+                'Site': 'Ansley Mall'
+            }
+        }
+    }).then(result => {
+        return result.data.data
+    })
+}

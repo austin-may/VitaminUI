@@ -12,8 +12,6 @@ function TabPanel(props: TabPanelProps) {
 
     const { children, value, index, ...other } = props;
 
-    console.log(props);
-
     return (
         <Box p={10}>
             {value === index && children}

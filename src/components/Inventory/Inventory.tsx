@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useReducer, Reducer, useContext } from "react";
-import { Select, FormControl, InputLabel, Container } from "@material-ui/core";
+import { Select, FormControl, InputLabel, Container, Button, Input } from "@material-ui/core";
 import InventoryItem from "./inventory-item";
 import InventorySearchBar from "./inventory-search-bar";
 import { InventoryProvider, InventoryContext } from "./inventory-context";
@@ -11,17 +11,15 @@ import { inventoryReducer } from "../../redux/reducers/inventory-reducers";
 import { bindActionCreators } from 'redux';
 import PropTypes from 'prop-types'
 
-let count = 0;
 function Inventory(props) {
+    const { loadInventory, addInventory } = props;
+    useEffect(() => {
+        loadInventory();
+    }, []); //This array is an array of items to watch, and it it changes it will rerender again.
+    //Otherwise, with the empty array as a second argument to effect means the effect will run only once when the component mounts.
 
-    console.log('yerr');
-    if (count === 0) {
-        props.actions.loadInventory();
-
-    }
-    count++;
-    console.log(count);
     const [searchQuery, setSearchQuery] = useState("");
+    const [inventoryToAdd, setInventoryToAdd] = useState('')
 
     //dispatch is a good generic term for managing state on multiple state objects
     // const [{ inventory, status, error }, dispatch] = useReducer(inventoryReducer, {
@@ -33,6 +31,11 @@ function Inventory(props) {
     const isLoading = props.state.status === actionTypes.REQUEST_STATUS.LOADING;
     const isSuccess = props.state.status === actionTypes.REQUEST_STATUS.SUCCESS;
     const isError = props.state.status === actionTypes.REQUEST_STATUS.ERROR;
+
+    function handleAdd(event) {
+        event.preventDefault();
+        addInventory(inventoryToAdd);
+    }
 
     return (
         <Container maxWidth="lg">
@@ -58,6 +61,9 @@ function Inventory(props) {
                     <div key={inventory.Name}>{inventory.Name}</div>
                 ))
             }
+            <Input type='text' placeholder='Type inventory to add' value={inventoryToAdd}
+                onChange={(e) => setInventoryToAdd(e.target.value)} />
+            <Button onClick={handleAdd}>Add Inventory</Button>
             {isError && <p>Error occured! {props.state.error}</p>}
         </Container>
     )
@@ -78,23 +84,20 @@ const InventoryComponent = (props: any) => {
 }
 
 Inventory.propTypes = {
-    dispatch: PropTypes.func.isRequired,
-    actions: PropTypes.object.isRequired
+    loadInventory: PropTypes.func.isRequired
 }
 
 // Determines what state is passed to our component via props
 function mapStateToProps(state) {
-    console.log('my state is:', state.inventoryReducer);
     return {
         state: state.inventoryReducer
     }
 }
 
 // What actions we want to expose on our component
-function mapDispatchToProps(dispatch) {
-    return {
-        actions: bindActionCreators(inventoryActions, dispatch) // bindActionCreators wraps ALL the actions in the dispatch call. Not just one
-    }
+const mapDispatchToProps = {
+    loadInventory: inventoryActions.loadInventory,
+    addInventory: inventoryActions.addInventory
 }
 
 //when we omit mapDispatchToProps, our component gets a dispatch prop injected automatically
