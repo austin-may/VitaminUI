@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useReducer, Reducer, useContext } from "react";
-import { Select, FormControl, InputLabel, Container, Button, Input } from "@material-ui/core";
+import { Select, FormControl, InputLabel, Container, Button, Input, CircularProgress } from "@material-ui/core";
 import InventoryItem from "./inventory-item";
 import InventorySearchBar from "./inventory-search-bar";
 import { InventoryProvider, InventoryContext } from "./inventory-context";
@@ -10,6 +10,7 @@ import * as actionTypes from '../../redux/actions/actionTypes';
 import { inventoryReducer } from "../../redux/reducers/inventory-reducers";
 import { bindActionCreators } from 'redux';
 import PropTypes from 'prop-types'
+import { inventoryImages } from "./inventory-utils";
 
 function Inventory(props) {
     const { loadInventory, addInventory } = props;
@@ -17,9 +18,11 @@ function Inventory(props) {
         loadInventory();
     }, []); //This array is an array of items to watch, and it it changes it will rerender again.
     //Otherwise, with the empty array as a second argument to effect means the effect will run only once when the component mounts.
+    const err: any = {};
+    const [searchQuery, setSearchQuery] = useState('');
+    const [inventoryToAdd, setInventoryToAdd] = useState('');
+    const [errors, setErrors] = useState(err);
 
-    const [searchQuery, setSearchQuery] = useState("");
-    const [inventoryToAdd, setInventoryToAdd] = useState('')
 
     //dispatch is a good generic term for managing state on multiple state objects
     // const [{ inventory, status, error }, dispatch] = useReducer(inventoryReducer, {
@@ -28,13 +31,27 @@ function Inventory(props) {
     //     error: null
     // });
 
+    //Remember, React components automatically re-render whenver there is a change in their sttae or props.
     const isLoading = props.state.status === actionTypes.REQUEST_STATUS.LOADING;
     const isSuccess = props.state.status === actionTypes.REQUEST_STATUS.SUCCESS;
     const isError = props.state.status === actionTypes.REQUEST_STATUS.ERROR;
 
     function handleAdd(event) {
         event.preventDefault();
+        if (!formIsValid()) return;
         addInventory(inventoryToAdd);
+    }
+
+    function formIsValid(): boolean {
+        const errors: any = {};
+
+        if (!inventoryToAdd) {
+            errors.name = "Name is required.";
+        }
+
+        setErrors(errors);
+
+        return Object.keys(errors).length === 0;
     }
 
     return (
@@ -52,17 +69,18 @@ function Inventory(props) {
                 </Select>
             </FormControl>
             <InventorySearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
-            {isLoading && <div>Loading...</div>}
+            {isLoading && <CircularProgress />}
 
             {
                 isSuccess && <div>SUCCESS</div> &&
-                <InventoryComponent searchQuery={searchQuery}></InventoryComponent> &&
-                Object.values(props.state.inventory).map((inventory: any) => (
-                    <div key={inventory.Name}>{inventory.Name}</div>
-                ))
+                <InventoryComponent searchQuery={searchQuery} inventory={props.state.inventory}></InventoryComponent>
+                // Object.values(props.state.inventory).map((inventory: any) => (
+                //     <div key={inventory.Name}>{inventory.Name}</div>
+                // ))
             }
             <Input type='text' placeholder='Type inventory to add' value={inventoryToAdd}
                 onChange={(e) => setInventoryToAdd(e.target.value)} />
+            {errors && <span>{errors.name}</span>}
             <Button onClick={handleAdd}>Add Inventory</Button>
             {isError && <p>Error occured! {props.state.error}</p>}
         </Container>
@@ -70,15 +88,15 @@ function Inventory(props) {
 }
 
 const InventoryComponent = (props: any) => {
-    const { inventoryImages, inventory }: { inventoryImages: InventoryImage[], inventory: any } = useContext(InventoryContext);
+    //const { inventoryImages, inventory }: { inventoryImages: InventoryImage[], inventory: any } = useContext(InventoryContext);
+    const inventoryNames = props.inventory.map((i: any) => i.Name);
     return (
         <div>
             {inventoryImages.filter((image: InventoryImage) => {
-                return image.name.includes(props.searchQuery.toLowerCase()) && inventory.includes(image.name)
-            })
-                .map((inventoryImage: InventoryImage, i) => {
-                    return <InventoryItem key={i} inventoryImage={inventoryImage} />
-                })}
+                return (image.name.includes(props.searchQuery) && inventoryNames.includes(image.name))
+            }).map((inventoryImage: InventoryImage, i) =>
+                <InventoryItem key={i} inventoryImage={inventoryImage} />
+            )}
         </div>
     )
 }

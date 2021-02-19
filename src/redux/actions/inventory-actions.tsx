@@ -28,11 +28,12 @@ export function loadInventory() {
             dispatch({ type: actionTypes.LOAD_INVENTORY, initialInventoryState })
             //sleep for 3 seconds to see Loading
             await new Promise(resolve => {
-                setTimeout(resolve, 500)
+                setTimeout(resolve, 1500)
             })
             const response: any = await inventoryApi.getInventoryAsync()
             return onSuccess(response.data.data);
         } catch (error) {
+            console.log(error);
             return onError(error);
         }
         function onSuccess(result) {
