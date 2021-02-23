@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useReducer, Reducer, useContext } from "react";
-import { Select, FormControl, InputLabel, Container, Button, Input, CircularProgress } from "@material-ui/core";
+import { Select, FormControl, InputLabel, Container, Button, Input, CircularProgress, Card, CardHeader, CardMedia, CardContent, Typography, CardActions, IconButton, Grid, Paper } from "@material-ui/core";
 import InventoryItem from "./inventory-item";
 import InventorySearchBar from "./inventory-search-bar";
 import { InventoryProvider, InventoryContext } from "./inventory-context";
@@ -72,11 +72,8 @@ function Inventory(props) {
             {isLoading && <CircularProgress />}
 
             {
-                isSuccess && <div>SUCCESS</div> &&
+                isSuccess &&
                 <InventoryComponent searchQuery={searchQuery} inventory={props.state.inventory}></InventoryComponent>
-                // Object.values(props.state.inventory).map((inventory: any) => (
-                //     <div key={inventory.Name}>{inventory.Name}</div>
-                // ))
             }
             <Input type='text' placeholder='Type inventory to add' value={inventoryToAdd}
                 onChange={(e) => setInventoryToAdd(e.target.value)} />
@@ -88,16 +85,46 @@ function Inventory(props) {
 }
 
 const InventoryComponent = (props: any) => {
-    //const { inventoryImages, inventory }: { inventoryImages: InventoryImage[], inventory: any } = useContext(InventoryContext);
+    //const {inventoryImages, inventory}: {inventoryImages: InventoryImage[], inventory: any } = useContext(InventoryContext);
     const inventoryNames = props.inventory.map((i: any) => i.Name);
     return (
-        <div>
+        <Grid container direction="row">
             {inventoryImages.filter((image: InventoryImage) => {
                 return (image.name.includes(props.searchQuery) && inventoryNames.includes(image.name))
             }).map((inventoryImage: InventoryImage, i) =>
-                <InventoryItem key={i} inventoryImage={inventoryImage} />
+                <Grid item xs={4}>
+                    <ItemCard key={i} inventoryImage={inventoryImage}></ItemCard>
+                </Grid>
             )}
-        </div>
+        </Grid>
+    )
+}
+
+const ItemCard = (props) => {
+    return (
+        <Card>
+            <CardHeader
+                action={
+                    <IconButton aria-label="settings">
+                    </IconButton>
+                }
+                title={props.inventoryImage.name}
+                subheader="September 14, 2016"
+            />
+            <InventoryItem key={props.key} inventoryImage={props.inventoryImage} />
+            <CardContent>
+                <Typography variant="body2" color="textSecondary" component="p">
+                    This impressive paella is a perfect party dish and a fun meal to cook together with your
+                    guests. Add 1 cup of frozen peas along with the mussels, if you like.
+        </Typography>
+            </CardContent>
+            <CardActions disableSpacing>
+                <IconButton aria-label="add to favorites">
+                </IconButton>
+                <IconButton aria-label="share">
+                </IconButton>
+            </CardActions>
+        </Card>
     )
 }
 
