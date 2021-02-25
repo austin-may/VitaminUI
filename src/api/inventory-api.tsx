@@ -29,7 +29,7 @@ export async function createInventoryAsync(name: string): Promise<any> {
         query: `
                 mutation AddInventory($newInventory: NewInventory!) {
                     createInventory(input: $newInventory) {
-                        InventoryId
+                        Id
                     }
                 }
             `,

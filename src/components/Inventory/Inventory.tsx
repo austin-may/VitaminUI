@@ -11,6 +11,7 @@ import { inventoryReducer } from "../../redux/reducers/inventory-reducers";
 import { bindActionCreators } from 'redux';
 import PropTypes from 'prop-types'
 import { inventoryImages } from "./inventory-utils";
+import styled from 'styled-components';
 
 function Inventory(props) {
     const { loadInventory, addInventory } = props;
@@ -85,7 +86,6 @@ function Inventory(props) {
 }
 
 const InventoryComponent = (props: any) => {
-    //const {inventoryImages, inventory}: {inventoryImages: InventoryImage[], inventory: any } = useContext(InventoryContext);
     const inventoryNames = props.inventory.map((i: any) => i.Name);
     return (
         <Grid container direction="row">
@@ -116,7 +116,7 @@ const ItemCard = (props) => {
                 <Typography variant="body2" color="textSecondary" component="p">
                     This impressive paella is a perfect party dish and a fun meal to cook together with your
                     guests. Add 1 cup of frozen peas along with the mussels, if you like.
-        </Typography>
+                </Typography>
             </CardContent>
             <CardActions disableSpacing>
                 <IconButton aria-label="add to favorites">

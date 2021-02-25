@@ -76,6 +76,7 @@ export function addInventory(inventoryName: string) {
         try {
             dispatch({ type: actionTypes.ADD_INVENTORY, inventoryState: {} });
             const result = await inventoryApi.createInventoryAsync(inventoryName);
+            console.log('thee result was;', result);
             dispatch(addInventorySuccess(result))
         } catch (err) {
             dispatch(addInventoryError(err))
