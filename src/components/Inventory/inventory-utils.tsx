@@ -25,4 +25,8 @@ export const inventoryImages: InventoryImage[] = [
         imageSrc: 'images/ribeye.jpg',
         name: 'ribeye'
     },
+    {
+        imageSrc: 'images/beet.jpg',
+        name: 'beet'
+    },
 ];
