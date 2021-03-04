@@ -1,6 +1,7 @@
 import React from 'react';
 import { AppBar, Tabs, Tab, Box } from "@material-ui/core";
-import Inventory from '../Inventory/inventory';
+import Inventory from '../inventory/inventory';
+import InventoryData from '../inventory-data/inventory-data';
 
 interface TabPanelProps {
     children?: React.ReactNode;
@@ -39,10 +40,10 @@ function Header() {
                 </Tabs>
             </AppBar>
             <TabPanel value={value} index={0}>
-                <Inventory />
+                <InventoryData />
             </TabPanel>
             <TabPanel value={value} index={1}>
-                Item Two
+                <Inventory />
             </TabPanel>
             <TabPanel value={value} index={2}>
                 Item Three

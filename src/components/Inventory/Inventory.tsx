@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useReducer, Reducer, useContext } from "react";
-import { Select, FormControl, InputLabel, Container, Button, Input, CircularProgress, Card, CardHeader, CardMedia, CardContent, Typography, CardActions, IconButton, Grid, Paper } from "@material-ui/core";
+import { Select, FormControl, InputLabel, Container, Button, Input, CircularProgress, Card, CardHeader, CardMedia, CardContent, Typography, CardActions, IconButton, Grid } from "@material-ui/core";
 import InventoryItem from "./inventory-item";
 import InventorySearchBar from "./inventory-search-bar";
 import { InventoryProvider, InventoryContext } from "./inventory-context";
@@ -7,11 +7,14 @@ import { InventoryImage } from "../../models/inventory-models";
 import { connect } from 'react-redux';
 import * as inventoryActions from '../../redux/actions/inventory-actions';
 import * as actionTypes from '../../redux/actions/actionTypes';
-import { inventoryReducer } from "../../redux/reducers/inventory-reducers";
+import { inventoryStore } from "../../redux/reducers/inventory-reducers";
 import { bindActionCreators } from 'redux';
 import PropTypes from 'prop-types'
 import { inventoryImages } from "./inventory-utils";
 import styled from 'styled-components';
+import { createSelector } from "reselect";
+
+
 
 function Inventory(props) {
     const { loadInventory, addInventory } = props;
@@ -24,7 +27,6 @@ function Inventory(props) {
     const [inventoryToAdd, setInventoryToAdd] = useState('');
     const [errors, setErrors] = useState(err);
 
-
     //dispatch is a good generic term for managing state on multiple state objects
     // const [{ inventory, status, error }, dispatch] = useReducer(inventoryReducer, {
     //     status: actionTypes.REQUEST_STATUS.LOADING,
@@ -33,9 +35,9 @@ function Inventory(props) {
     // });
 
     //Remember, React components automatically re-render whenver there is a change in their sttae or props.
-    const isLoading = props.state.status === actionTypes.REQUEST_STATUS.LOADING;
-    const isSuccess = props.state.status === actionTypes.REQUEST_STATUS.SUCCESS;
-    const isError = props.state.status === actionTypes.REQUEST_STATUS.ERROR;
+    const isLoading = props.status === actionTypes.REQUEST_STATUS.LOADING;
+    const isSuccess = props.status === actionTypes.REQUEST_STATUS.SUCCESS;
+    const isError = props.status === actionTypes.REQUEST_STATUS.ERROR;
 
     function handleAdd(event) {
         event.preventDefault();
@@ -57,30 +59,18 @@ function Inventory(props) {
 
     return (
         <Container maxWidth="lg">
-            <FormControl variant="outlined">
-                <InputLabel htmlFor="outlined-age-native-simple">Site</InputLabel>
-                <Select
-                    native
-                    label="Site"
-                >
-                    <option aria-label="None" value="" />
-                    <option value={10}>Ansley Mall</option>
-                    <option value={20}>Brookhaven</option>
-                    <option value={30}>GA Tech Campus</option>
-                </Select>
-            </FormControl>
             <InventorySearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
             {isLoading && <CircularProgress />}
 
             {
                 isSuccess &&
-                <InventoryComponent searchQuery={searchQuery} inventory={props.state.inventory}></InventoryComponent>
+                <InventoryComponent searchQuery={searchQuery} inventory={props.inventory}></InventoryComponent>
             }
             <Input type='text' placeholder='Type inventory to add' value={inventoryToAdd}
                 onChange={(e) => setInventoryToAdd(e.target.value)} />
             {errors && <span>{errors.name}</span>}
             <Button onClick={handleAdd}>Add Inventory</Button>
-            {isError && <p>Error occured! {props.state.error}</p>}
+            {isError && <p>Error occured! {props.error}</p>}
         </Container>
     )
 }
@@ -134,8 +124,10 @@ Inventory.propTypes = {
 
 // Determines what state is passed to our component via props
 function mapStateToProps(state) {
+    const { inventory, status } = state.inventoryStore;
     return {
-        state: state.inventoryReducer
+        inventory: inventory,
+        status
     }
 }
 

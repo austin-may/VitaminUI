@@ -4,7 +4,7 @@ import InventoryRenderProps from "./inventory-render-props";
 import InventoryItem from "../inventory-item";
 import InventorySearchBar from "../inventory-search-bar";
 import { GET_ALL_SUCCESS, UPDATE_STATUS } from "../../../actions/inventory-actions";
-import { inventoryReducer } from "../../../redux/reducers/inventory-reducers";
+import { inventoryStore } from "../../../redux/reducers/inventory-reducers";
 import { InventoryImage } from "../../../models/inventory-models";
 import * as actionTypes from '../../../redux/actions/actionTypes'
 
@@ -42,7 +42,7 @@ export default function Inventory() {
 
     const [searchQuery, setSearchQuery] = useState("");
     // dispatch is a good generic term for managing state on multiple state objects
-    const [{ inventory, status, error }, dispatch] = useReducer(inventoryReducer, {
+    const [{ inventoryData, status, error }, dispatch] = useReducer(inventoryStore, {
         status: actionTypes.REQUEST_STATUS.LOADING,
         inventory: [],
         error: null
@@ -96,7 +96,7 @@ export default function Inventory() {
                         return (
                             <div>
                                 {inventoryImages.filter((image: InventoryImage) => {
-                                    return image.name.includes(searchQuery.toLowerCase()) && inventory.includes(image.name)
+                                    return image.name.includes(searchQuery.toLowerCase()) && inventoryData.includes(image.name)
                                 })
                                     .map((inventoryImage: InventoryImage, i) => {
                                         return <InventoryItem key={i} inventoryImage={inventoryImage} />

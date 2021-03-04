@@ -12,6 +12,7 @@ export async function getInventoryAsync(): Promise<any> {
                     inventory {
                         Name,
                         Count,
+                        Site,
                         InventoryVitamin {
                             VitaminId,
                             PercentDailyValue

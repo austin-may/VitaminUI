@@ -27,9 +27,9 @@ export function loadInventory() {
         try {
             dispatch({ type: actionTypes.LOAD_INVENTORY, initialInventoryState })
             //sleep for 3 seconds to see Loading
-            await new Promise(resolve => {
-                setTimeout(resolve, 1500)
-            })
+            // await new Promise(resolve => {
+            //     setTimeout(resolve, 1500)
+            // })
             const response: any = await inventoryApi.getInventoryAsync()
             return onSuccess(response.data.data);
         } catch (error) {
@@ -81,5 +81,12 @@ export function addInventory(inventoryName: string) {
         } catch (err) {
             dispatch(addInventoryError(err))
         }
+    }
+}
+
+export function setSite(site: string) {
+    console.log('site:', site);
+    return function (dispatch) {
+        dispatch({ type: actionTypes.SET_SITE, inventoryState: site })
     }
 }

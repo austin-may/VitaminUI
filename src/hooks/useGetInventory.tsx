@@ -3,7 +3,7 @@ import { useEffect, useReducer, useState } from "react";
 import * as actionTypes from "../redux/actions/actionTypes";
 import * as inventoryActions from '../redux/actions/inventory-actions'
 import { InventoryImage } from "../models/inventory-models";
-import { inventoryReducer } from '../redux/reducers/inventory-reducers';
+import { inventoryStore } from '../redux/reducers/inventory-reducers';
 
 function useGetInventory() {
     const inventoryImages: InventoryImage[] = [
@@ -25,7 +25,7 @@ function useGetInventory() {
     const signal = React.useRef(axios.CancelToken.source()); // use React.useRef to guarantee we still have reference to this cancellation token is not disposed of during the liftime of the component
 
     // dispatch is a good generic term for managing state on multiple state objects
-    const [{ inventory, status, error }, dispatch] = useReducer(inventoryReducer, {
+    const [{ inventoryData, status, error }, dispatch] = useReducer(inventoryStore, {
         status: actionTypes.REQUEST_STATUS.LOADING,
         inventory: [],
         error: null
@@ -41,7 +41,7 @@ function useGetInventory() {
 
     const state = {
         inventoryImages,
-        inventory,
+        inventoryStore,
         status,
         error
     }

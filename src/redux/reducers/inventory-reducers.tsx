@@ -1,7 +1,12 @@
 import * as actionTypes from '../actions/actionTypes';
 import { Reducer } from "react"
 
-export const inventoryReducer: Reducer<any, any> = (state: any = {}, action: any = {}) => {
+const initialState = {
+    inventory: [],
+    site: 'All'
+}
+
+export const inventoryStore: Reducer<any, any> = (state: any = {}, action: any = {}) => {
     switch (action.type) {
         case actionTypes.ADD_INVENTORY_SUCCESS:
             return {
@@ -17,6 +22,7 @@ export const inventoryReducer: Reducer<any, any> = (state: any = {}, action: any
             };
         case actionTypes.LOAD_INVENTORY_SUCCESS:
             return {
+                ...state,
                 inventory: action.inventoryState.inventory,
                 status: actionTypes.REQUEST_STATUS.SUCCESS
             };
@@ -26,7 +32,12 @@ export const inventoryReducer: Reducer<any, any> = (state: any = {}, action: any
                 error: action.err,
                 status: actionTypes.REQUEST_STATUS.ERROR
             };
+        case actionTypes.SET_SITE:
+            return {
+                ...state,
+                site: action.inventoryState
+            };
         default:
-            return state;
+            return initialState;
     }
 }

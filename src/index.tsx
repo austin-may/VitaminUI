@@ -5,7 +5,7 @@ import 'react-notifications-component/dist/theme.css'
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import configureStore from './redux/configureStore';
-import { Provider as ReduxProvider } from 'react-redux';
+import { Provider as ReduxProvider } from '../node_modules/react-redux'
 
 const store = configureStore({});
 
