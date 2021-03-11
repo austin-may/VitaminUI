@@ -8,6 +8,12 @@ const initialState = {
 
 export const inventoryStore: Reducer<any, any> = (state: any = {}, action: any = {}) => {
     switch (action.type) {
+        case actionTypes.ADD_INVENTORY:
+            return {
+                ...state,
+                inventory: [...state.inventory],
+                status: actionTypes.REQUEST_STATUS.LOADING
+            }
         case actionTypes.ADD_INVENTORY_SUCCESS:
             return {
                 ...state,
