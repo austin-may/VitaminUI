@@ -1,7 +1,7 @@
 import * as actionTypes from './actionTypes';
 import * as inventoryApi from '../../api/inventory-api';
 import { store } from 'react-notifications-component';
-import { Inventory } from '../../models/inventory-models';
+import { InventoryItem } from '../../models/inventory-models';
 
 const initialInventoryState = { Name: '', Count: 0 }
 
@@ -71,12 +71,11 @@ export function loadInventory() {
     }
 }
 
-export function addInventory(inventoryName: string) {
+export function addInventory(inventoryItem: InventoryItem) {
     return async function (dispatch) {
         try {
-            console.log('dispatchhhhhhh', dispatch);
             dispatch({ type: actionTypes.ADD_INVENTORY, inventoryState: {} });
-            const result = await inventoryApi.createInventoryAsync(inventoryName);
+            const result = await inventoryApi.createInventoryAsync(inventoryItem);
             console.log('thee result was;', result);
             dispatch(addInventorySuccess(result))
         } catch (err) {

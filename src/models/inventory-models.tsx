@@ -3,8 +3,8 @@ export interface InventoryImage {
     name: string
 }
 
-export interface Inventory {
-    Name: string,
-    Count: number,
-    Site: string
+export interface InventoryItem {
+    name: string,
+    count: number,
+    site: string
 }

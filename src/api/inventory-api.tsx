@@ -1,5 +1,6 @@
 import SelectInput from "@material-ui/core/Select/SelectInput";
 import { SSL_OP_EPHEMERAL_RSA } from "constants";
+import { InventoryItem } from "../models/inventory-models";
 
 export async function getInventoryAsync(): Promise<any> {
     const axios = require('axios');
@@ -24,7 +25,7 @@ export async function getInventoryAsync(): Promise<any> {
     })
 }
 
-export async function createInventoryAsync(name: string): Promise<any> {
+export async function createInventoryAsync(newInventory: InventoryItem): Promise<any> {
     const axios = require('axios');
     return await axios.post('http://localhost:8080/query', {
         query: `
@@ -35,11 +36,7 @@ export async function createInventoryAsync(name: string): Promise<any> {
                 }
             `,
         variables: {
-            'newInventory': {
-                'Name': name,
-                'Count': 100,
-                'Site': 'Ansley Mall'
-            }
+            newInventory
         }
     }).then(result => {
         return result.data.data

@@ -3,81 +3,100 @@ import AddIcon from '@material-ui/icons/Add';
 import { connect } from 'react-redux';
 import React, { ChangeEvent, useEffect, useReducer, useState } from "react"
 import * as inventoryActions from '../../redux/actions/inventory-actions';
-import { CircularProgress, Container, FormControl, FormHelperText, InputLabel, Select, Input, Fab, Modal, Dialog, Button, DialogContent, TextField } from "@material-ui/core";
+import { CircularProgress, Container, FormControl, FormHelperText, InputLabel, Select, Input, Fab, Dialog, Button, DialogContent, Icon, TextField, withStyles } from "@material-ui/core";
 import inventory from "../inventory/inventory";
-import { Inventory } from "../../models/inventory-models";
+import { InventoryItem } from "../../models/inventory-models";
 import * as actionTypes from '../../redux/actions/actionTypes';
 import styled from 'styled-components';
-import { FormatLineSpacingOutlined } from "@material-ui/icons";
+import { Send } from "@material-ui/icons";
+import { inventoryStore } from "../../redux/reducers/inventory-reducers";
 
 const InventoryForm = ({ props }) => {
     const { addInventory, setOpenDialog } = props;
 
     const FormContainer = styled.div`
     height: 550px;
-    width: 550px;
+    width: 350px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;    
   `;
+
+    const InventoryFormButton = withStyles({
+        root: {
+            background: 'red',
+            borderRadius: 3,
+            border: 0,
+            color: 'white',
+            height: 48,
+            padding: '0 30px',
+            flex: '0 0 40px',
+            width: '25%',
+            alignSelf: 'flex-end'
+        },
+        label: {
+            textTransform: 'capitalize',
+        },
+    })(Button);
 
     function handleSubmit(event) {
         event.preventDefault();
         const formData = new FormData(event.target as HTMLFormElement);
-        const inventoryName = formData.get('name');
+        const Name = formData.get('name');
+        const Count = formData.get('count');
+        const Site = formData.get('site');
+        const newInventoryItem = { Name, Count, Site };
+
         //if (!formIsValid()) return;
-        addInventory(inventoryName);
+        addInventory(newInventoryItem);
         setOpenDialog(false);
     }
 
     return (
-        <FormContainer>
-            <form onSubmit={handleSubmit}>
-                <FormControl>
-                    <InputLabel>Name</InputLabel>
-                    <Input type='text'
-                        name='name'
-                    />
-                    <FormHelperText>Input the name of the item to add</FormHelperText>
-                </FormControl>
-                <br />
-                {/* <FormControl>
-                    <InputLabel htmlFor="my-input">Price</InputLabel>
-                    <Input id="my-input" aria-describedby="my-helper-text" />
-                    <FormHelperText id="my-helper-text">Input the price of the item to add</FormHelperText>
-                </FormControl>
-                <br />
-                <FormControl>
-                    <InputLabel htmlFor="my-input">Expiration Date</InputLabel>
-                    <Input id="my-input" aria-describedby="my-helper-text" />
-                    <FormHelperText id="my-helper-text">Input the expiration date of the item to add</FormHelperText>
-                </FormControl>
-                <br />
-                <FormControl>
-                    <InputLabel htmlFor="my-input">Count</InputLabel>
-                    <Input id="my-input" aria-describedby="my-helper-text" />
-                    <FormHelperText id="my-helper-text">Input how many of this item is needed</FormHelperText>
-                </FormControl> */}
-                <br />
-                <FormControl>
-                    <InputLabel htmlFor="outlined-age-native-simple">Site</InputLabel>
+        <form onSubmit={handleSubmit}>
+
+            <FormContainer>
+                <TextField type='text'
+                    name='name'
+                    label='Name'
+                    variant="outlined" />
+                <TextField type='text'
+                    name='price'
+                    label='Price'
+                    variant="outlined" />
+                <TextField type='text'
+                    name='expiration'
+                    label='Expiration Date'
+                    variant="outlined" />
+                <TextField type='text'
+                    name='count'
+                    label='Count'
+                    variant="outlined" />
+                <FormControl variant='outlined'>
+                    <InputLabel>Site</InputLabel>
                     <Select
                         native
+                        name='site'
                         label="Site">
-                        <option value='All'>All</option>
                         <option value='Ansley Mall'>Ansley Mall</option>
                         <option value='Brookhaven'>Brookhaven</option>
                         <option value='GA Tech Campus'>GA Tech Campus</option>
                     </Select>
                 </FormControl>
-                <br />
-                {/* <FormControl>
-                    <InputLabel htmlFor="my-input">SKU Number</InputLabel>
-                    <Input id="my-input" aria-describedby="my-helper-text" />
-                </FormControl> */}
-                <br></br>
-                <Button type="submit">Add</Button>
-                <br />
-            </form>
+                <TextField type='text'
+                    name='sku'
+                    label='SKU Number'
+                    variant="outlined" />
+                <InventoryFormButton
+                    variant="contained"
+                    color="primary"
+                    type='submit'
+                    endIcon={<Send></Send>}>
+                    Send
+                </InventoryFormButton>
+            </FormContainer>
+        </form>
 
-        </FormContainer>
     )
 }
 
@@ -99,6 +118,30 @@ const AddInventoryDialog = (dialogProps) => {
 }
 
 const InventoryData = (props) => {
+
+    const InventoryDataContainer = withStyles({
+        root: {
+            display: 'flex',
+            flexDirection: 'row'
+        },
+    })(Container);
+
+    const AddInventory = withStyles({
+        root: {
+            alignSelf: 'flex-start',
+            justifyContent: 'center',
+            background: 'red',
+            color: 'white'
+        },
+    })(Button);
+
+    const SiteSelection = withStyles({
+        root: {
+            marginLeft: 'auto'
+        },
+    })(FormControl);
+
+
     const { loadInventory, addInventory, setSite } = props;
     const [nameFromAddDialog, setNameFromAddDialog] = useState('');
     const [openDialog, setOpenDialog] = useState(false);
@@ -143,24 +186,26 @@ const InventoryData = (props) => {
             {isLoading && <CircularProgress />}
             {isSuccess &&
                 <div>
-                    <Fab color="primary" aria-label="add" onClick={addInventoryDialog}>
-                        <AddIcon />
-                    </Fab>
-                    <AddInventoryDialog open={openDialog} setOpenDialog={setOpenDialog} formProps={formProps}>
-                    </AddInventoryDialog>
-                    <FormControl variant="outlined">
-                        <InputLabel htmlFor="outlined-age-native-simple">Site</InputLabel>
-                        <Select
-                            native
-                            label="Site"
-                            onChange={(e: ChangeEvent<{ value: any }>) => setSite(e.target.value)}
-                        >
-                            <option value='All'>All</option>
-                            <option value='Ansley Mall'>Ansley Mall</option>
-                            <option value='Brookhaven'>Brookhaven</option>
-                            <option value='GA Tech Campus'>GA Tech Campus</option>
-                        </Select>
-                    </FormControl>
+                    <InventoryDataContainer>
+                        <AddInventory color="primary" aria-label="add" onClick={addInventoryDialog}>Add Inventory
+                            <AddIcon />
+                        </AddInventory>
+                        <AddInventoryDialog open={openDialog} setOpenDialog={setOpenDialog} formProps={formProps}>
+                        </AddInventoryDialog>
+                        <SiteSelection variant="outlined">
+                            <InputLabel htmlFor="outlined-age-native-simple">Site</InputLabel>
+                            <Select
+                                native
+                                label="Site"
+                                onChange={(e: ChangeEvent<{ value: any }>) => setSite(e.target.value)}
+                            >
+                                <option value='All'>All</option>
+                                <option value='Ansley Mall'>Ansley Mall</option>
+                                <option value='Brookhaven'>Brookhaven</option>
+                                <option value='GA Tech Campus'>GA Tech Campus</option>
+                            </Select>
+                        </SiteSelection>
+                    </InventoryDataContainer>
                     <div style={{ height: 500, width: '100%' }}>
                         <DataGrid rows={rows} columns={columns}></DataGrid>
                     </div>
