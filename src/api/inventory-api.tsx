@@ -12,8 +12,11 @@ export async function getInventoryAsync(): Promise<any> {
                 query getInventory {
                     inventory {
                         Name,
+                        Price,
                         Count,
                         Site,
+                        ExpirationDate,
+                        SkuNumber,
                         InventoryVitamin {
                             VitaminId,
                             PercentDailyValue
@@ -31,7 +34,7 @@ export async function createInventoryAsync(newInventory: InventoryItem): Promise
         query: `
                 mutation AddInventory($newInventory: NewInventory!) {
                     createInventory(input: $newInventory) {
-                        Id, Name, Count, Site
+                        Id, Name, Count, Price, ExpirationDate, Site, SkuNumber
                     }
                 }
             `,

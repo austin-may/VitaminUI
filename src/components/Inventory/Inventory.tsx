@@ -24,38 +24,12 @@ function Inventory(props) {
     //Otherwise, with the empty array as a second argument to effect means the effect will run only once when the component mounts.
     const err: any = {};
     const [searchQuery, setSearchQuery] = useState('');
-    const [inventoryToAdd, setInventoryToAdd] = useState('');
     const [errors, setErrors] = useState(err);
-
-    //dispatch is a good generic term for managing state on multiple state objects
-    // const [{ inventory, status, error }, dispatch] = useReducer(inventoryReducer, {
-    //     status: actionTypes.REQUEST_STATUS.LOADING,
-    //     inventory: [],
-    //     error: null
-    // });
 
     //Remember, React components automatically re-render whenver there is a change in their sttae or props.
     const isLoading = props.status === actionTypes.REQUEST_STATUS.LOADING;
     const isSuccess = props.status === actionTypes.REQUEST_STATUS.SUCCESS;
     const isError = props.status === actionTypes.REQUEST_STATUS.ERROR;
-
-    function handleAdd(event) {
-        event.preventDefault();
-        if (!formIsValid()) return;
-        addInventory(inventoryToAdd);
-    }
-
-    function formIsValid(): boolean {
-        const errors: any = {};
-
-        if (!inventoryToAdd) {
-            errors.name = "Name is required.";
-        }
-
-        setErrors(errors);
-
-        return Object.keys(errors).length === 0;
-    }
 
     return (
         <Container maxWidth="lg">
@@ -66,10 +40,7 @@ function Inventory(props) {
                 isSuccess &&
                 <InventoryComponent searchQuery={searchQuery} inventory={props.inventory}></InventoryComponent>
             }
-            <Input type='text' placeholder='Type inventory to add' value={inventoryToAdd}
-                onChange={(e) => setInventoryToAdd(e.target.value)} />
             {errors && <span>{errors.name}</span>}
-            <Button onClick={handleAdd}>Add Inventory</Button>
             {isError && <p>Error occured! {props.error}</p>}
         </Container>
     )

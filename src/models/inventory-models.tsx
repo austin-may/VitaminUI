@@ -4,7 +4,10 @@ export interface InventoryImage {
 }
 
 export interface InventoryItem {
-    name: string,
-    count: number,
-    site: string
+    Name: string,
+    Count: number,
+    Price: number,
+    ExpirationDate: string,
+    Site: string,
+    SkuNumber: string
 }

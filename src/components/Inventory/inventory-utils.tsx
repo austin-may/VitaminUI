@@ -3,30 +3,34 @@ import { InventoryImage } from "../../models/inventory-models";
 export const inventoryImages: InventoryImage[] = [
     {
         imageSrc: 'images/apple.jpg',
-        name: 'apple'
+        name: 'Apple'
     },
     {
         imageSrc: 'images/carrot.jpg',
-        name: 'carrots'
+        name: 'Carrot'
     },
     {
         imageSrc: 'images/kale.jpg',
-        name: 'kale'
+        name: 'Kale'
     },
     {
         imageSrc: 'images/lemon.png',
-        name: 'lemon'
+        name: 'Lemon'
     },
     {
         imageSrc: 'images/redbellpepper.png',
-        name: 'redbellpepper'
+        name: 'Bell pepper (red)'
     },
     {
         imageSrc: 'images/ribeye.jpg',
-        name: 'ribeye'
+        name: 'Ribeye'
     },
     {
         imageSrc: 'images/beet.jpg',
-        name: 'beet'
+        name: 'Beet'
+    },
+    {
+        imageSrc: 'images/kiwi.jpg',
+        name: 'Kiwi'
     },
 ];

@@ -1,15 +1,16 @@
-import { DataGrid, GridRowsProp, GridColDef } from "@material-ui/data-grid"
+import { DataGrid, GridRowsProp, GridColDef, GridCellClassParams } from "@material-ui/data-grid"
 import AddIcon from '@material-ui/icons/Add';
 import { connect } from 'react-redux';
 import React, { ChangeEvent, useEffect, useReducer, useState } from "react"
 import * as inventoryActions from '../../redux/actions/inventory-actions';
-import { CircularProgress, Container, FormControl, FormHelperText, InputLabel, Select, Input, Fab, Dialog, Button, DialogContent, Icon, TextField, withStyles } from "@material-ui/core";
+import { CircularProgress, Container, FormControl, FormHelperText, InputLabel, Select, Dialog, Button, DialogContent, TextField, withStyles, makeStyles } from "@material-ui/core";
 import inventory from "../inventory/inventory";
 import { InventoryItem } from "../../models/inventory-models";
 import * as actionTypes from '../../redux/actions/actionTypes';
 import styled from 'styled-components';
 import { Send } from "@material-ui/icons";
-import { inventoryStore } from "../../redux/reducers/inventory-reducers";
+import Autocomplete from '@material-ui/lab/Autocomplete';
+import clsx from "clsx";
 
 const InventoryForm = ({ props }) => {
     const { addInventory, setOpenDialog } = props;
@@ -39,38 +40,74 @@ const InventoryForm = ({ props }) => {
         },
     })(Button);
 
+    let Name: string | null = '';
     function handleSubmit(event) {
         event.preventDefault();
         const formData = new FormData(event.target as HTMLFormElement);
-        const Name = formData.get('name');
+        console.log('formData', formData);
         const Count = formData.get('count');
+        const Price = formData.get('price');
+        const ExpirationDate = formData.get('expirationDate');
         const Site = formData.get('site');
-        const newInventoryItem = { Name, Count, Site };
+        const SkuNumber = formData.get('skuNumber');
+        const newInventoryItem = { Id: 0, Name, Count, Price, ExpirationDate, Site, SkuNumber };
 
         //if (!formIsValid()) return;
         addInventory(newInventoryItem);
         setOpenDialog(false);
     }
 
+    // This will have to do for now
+    const inventoryArray = [
+        'Oatmeal',
+        'Egg',
+        'Kale',
+        'Lemon',
+        'Orange',
+        'Ribeye',
+        'Carrot',
+        'Russet potato',
+        'Sweet potato',
+        'Beet',
+        'Apple',
+        'Bell pepper (red)',
+        'Chicken',
+        'Ground turkey',
+        'Kiwi',
+        'Banana',
+        'Broccolli',
+        'Red Wine',
+        'Salmon',
+        'Coffee',
+        'Water',
+        'Penne pasta',
+        'Colby jack cheese',
+        'Burger patty'
+    ];
+
     return (
         <form onSubmit={handleSubmit}>
 
             <FormContainer>
+                <Autocomplete
+                    id="combo-box-demo"
+                    options={inventoryArray}
+                    getOptionLabel={(name) => name}
+                    style={{ width: '100%' }}
+                    onChange={(_, value) => Name = value}
+                    renderInput={(params) => <TextField {...params} label="Name" variant="outlined" />}
+                />
                 <TextField type='text'
-                    name='name'
-                    label='Name'
+                    name='count'
+                    label='Count'
                     variant="outlined" />
                 <TextField type='text'
                     name='price'
                     label='Price'
                     variant="outlined" />
                 <TextField type='text'
-                    name='expiration'
+                    name='expirationDate'
                     label='Expiration Date'
-                    variant="outlined" />
-                <TextField type='text'
-                    name='count'
-                    label='Count'
                     variant="outlined" />
                 <FormControl variant='outlined'>
                     <InputLabel>Site</InputLabel>
@@ -84,7 +121,7 @@ const InventoryForm = ({ props }) => {
                     </Select>
                 </FormControl>
                 <TextField type='text'
-                    name='sku'
+                    name='skuNumber'
                     label='SKU Number'
                     variant="outlined" />
                 <InventoryFormButton
@@ -116,6 +153,8 @@ const AddInventoryDialog = (dialogProps) => {
         </Dialog>
     )
 }
+
+
 
 const InventoryData = (props) => {
 
@@ -155,19 +194,38 @@ const InventoryData = (props) => {
         loadInventory();
     }, []);
 
+    const useStyles = makeStyles({
+        root: {
+            '& .inventory-data.expired': {
+                color: 'red',
+                fontWeight: '600',
+            }
+        },
+    });
+
     let rows: GridRowsProp = [];
     const columns: GridColDef[] = [
         { field: 'Name', headerName: 'Name', width: 150 },
         { field: 'Count', headerName: 'Count', width: 150 },
+        { field: 'Price', headerName: 'Price', width: 150 },
+        {
+            field: 'ExpirationDate', headerName: 'Expiration Date', width: 250,
+            cellClassName: (params: GridCellClassParams) =>
+                clsx('inventory-data', {
+                    expired: params.value != undefined && (new Date(params.value.toString()) as Date) < new Date()
+                }),
+        },
+        { field: 'SkuNumber', headerName: 'SKU Number', width: 150 },
+
     ];
 
     if (props.inventoryData && props.inventoryData.length > 0 && props.site !== undefined) {
         rows = props.site === 'All' ? props.inventoryData.map((x, index) => {
-            return { id: ++index, Name: x.Name, Count: x.Count };
+            return { id: ++index, Name: x.Name, Count: x.Count, Price: x.Price, ExpirationDate: x.ExpirationDate, SkuNumber: x.SkuNumber };
         })
             :
             props.inventoryData.filter(i => i.Site === props.site).map((x, index) => {
-                return { id: ++index, Name: x.Name, Count: x.Count };
+                return { id: ++index, Name: x.Name, Count: x.Count, Price: x.Price, ExpirationDate: x.ExpirationDate, SkuNumber: x.SkuNumber };
             });
 
     }
@@ -181,8 +239,10 @@ const InventoryData = (props) => {
     const isSuccess = props.status === actionTypes.REQUEST_STATUS.SUCCESS;
     const isError = props.status === actionTypes.REQUEST_STATUS.ERROR;
 
+    const classes = useStyles();
+
     return (
-        <Container maxWidth="lg">
+        <Container maxWidth="md">
             {isLoading && <CircularProgress />}
             {isSuccess &&
                 <div>
@@ -206,7 +266,7 @@ const InventoryData = (props) => {
                             </Select>
                         </SiteSelection>
                     </InventoryDataContainer>
-                    <div style={{ height: 500, width: '100%' }}>
+                    <div style={{ display: 'flex', height: 500 }} className={classes.root}>
                         <DataGrid rows={rows} columns={columns}></DataGrid>
                     </div>
                 </div>
