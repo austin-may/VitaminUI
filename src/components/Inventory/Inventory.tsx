@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useReducer, Reducer, useContext } from "react";
-import { Select, FormControl, InputLabel, Container, Button, Input, CircularProgress, Card, CardHeader, CardMedia, CardContent, Typography, CardActions, IconButton, Grid } from "@material-ui/core";
+import { Select, FormControl, InputLabel, Container, Button, Input, CircularProgress, Card, CardHeader, CardMedia, CardContent, Typography, CardActions, IconButton, Grid, withStyles, makeStyles } from "@material-ui/core";
 import InventoryItem from "./inventory-item";
 import InventorySearchBar from "./inventory-search-bar";
 import { InventoryProvider, InventoryContext } from "./inventory-context";
@@ -13,6 +13,9 @@ import PropTypes from 'prop-types'
 import { inventoryImages } from "./inventory-utils";
 import styled from 'styled-components';
 import { createSelector } from "reselect";
+import clsx from "clsx";
+import { setGridRowCountStateUpdate } from "@material-ui/data-grid";
+import { POINT_CONVERSION_UNCOMPRESSED } from "constants";
 
 
 
@@ -31,14 +34,44 @@ function Inventory(props) {
     const isSuccess = props.status === actionTypes.REQUEST_STATUS.SUCCESS;
     const isError = props.status === actionTypes.REQUEST_STATUS.ERROR;
 
+    const [inventoryChosen, setInventoryChosen] = useState([]);
+
+    const InventoryContainer = withStyles({
+        root: {
+            display: 'flex',
+            flexDirection: 'row'
+        },
+    })(Container);
+
+    const ConsumeInventory = withStyles({
+        root: {
+            alignSelf: 'flex-end',
+            justifyContent: 'center',
+            background: 'red',
+            color: 'white',
+            marginLeft: 'auto'
+        },
+    })(Button);
+
+    const gatherSelections = (data) => {
+        setInventoryChosen(data);
+    }
+
+    function consumeInventory() {
+        console.log('sending following selections to be consumed:', inventoryChosen);
+        //api call needed here
+    }
+
     return (
         <Container maxWidth="lg">
+            <InventoryContainer>
+                <ConsumeInventory onClick={consumeInventory}>Consume</ConsumeInventory>
+            </InventoryContainer>
             <InventorySearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
             {isLoading && <CircularProgress />}
-
             {
                 isSuccess &&
-                <InventoryComponent searchQuery={searchQuery} inventory={props.inventory}></InventoryComponent>
+                <InventoryComponent searchQuery={searchQuery} inventory={props.inventory} gatherSelections={gatherSelections}></InventoryComponent>
             }
             {errors && <span>{errors.name}</span>}
             {isError && <p>Error occured! {props.error}</p>}
@@ -48,44 +81,92 @@ function Inventory(props) {
 
 const InventoryComponent = (props: any) => {
     const inventoryNames = props.inventory.map((i: any) => i.Name);
+
+    const [itemsSelected, setItemsSelected] = useState<string[]>([]);
+
+    const chooseItem = (item: string) => {
+        setItemsSelected([...itemsSelected, item]);
+    }
+
+    const removeItem = (item: string) => {
+        setItemsSelected(itemsSelected.filter(x => x !== item));
+    }
+
+    props.gatherSelections(itemsSelected);
+
+    const itemFunctionRefs = { chooseItem, removeItem };
+
     return (
         <Grid container direction="row">
             {inventoryImages.filter((image: InventoryImage) => {
-                return (image.name.includes(props.searchQuery) && inventoryNames.includes(image.name))
-            }).map((inventoryImage: InventoryImage, i) =>
+                return (image.name.toLowerCase().includes(props.searchQuery.toLowerCase()) && inventoryNames.includes(image.name))
+            }).map((inventoryImage: InventoryImage) =>
                 <Grid item xs={4}>
-                    <ItemCard key={i} inventoryImage={inventoryImage}></ItemCard>
+                    <ItemCard id={inventoryImage.name} inventoryImage={inventoryImage} itemFunctions={itemFunctionRefs}></ItemCard>
                 </Grid>
             )}
         </Grid>
     )
 }
 
+
+
 const ItemCard = (props) => {
+
+    const cardStyle = makeStyles({
+        root: {
+            '&:hover': {
+                cursor: 'pointer'
+            },
+            '& .inventory-data.chosen': {
+                borderStyle: 'solid',
+                borderColor: 'red',
+                borderRadius: 3,
+                color: 'black',
+            },
+        }
+    })(Card);
+
+    const classes = cardStyle;
+
+    let [count, setCount] = useState(0);
+    const showChosen = ($event) => {
+        setCount(++count);
+        console.log('event', $event);
+        console.log('props', props);
+        count % 2 == 1 ? props.itemFunctions.chooseItem($event.target.alt) : props.itemFunctions.removeItem($event.target.alt);
+    }
+
     return (
-        <Card>
-            <CardHeader
-                action={
-                    <IconButton aria-label="settings">
-                    </IconButton>
-                }
-                title={props.inventoryImage.name}
-                subheader="September 14, 2016"
-            />
-            <InventoryItem key={props.key} inventoryImage={props.inventoryImage} />
-            <CardContent>
-                <Typography variant="body2" color="textSecondary" component="p">
-                    This impressive paella is a perfect party dish and a fun meal to cook together with your
-                    guests. Add 1 cup of frozen peas along with the mussels, if you like.
+        <div className={classes.root}>
+            {props.itemsSelected}
+            <Card id={props.id} className={
+                clsx('inventory-data', {
+                    chosen: count % 2 === 1
+                })} onClick={showChosen}>
+                <CardHeader
+                    action={
+                        <IconButton aria-label="settings">
+                        </IconButton>
+                    }
+                    title={props.inventoryImage.name}
+                    subheader="September 14, 2016"
+                />
+                <InventoryItem key={props.key} inventoryImage={props.inventoryImage} />
+                <CardContent>
+                    <Typography variant="body2" color="textSecondary" component="p">
+                        This impressive paella is a perfect party dish and a fun meal to cook together with your
+                        guests. Add 1 cup of frozen peas along with the mussels, if you like.
                 </Typography>
-            </CardContent>
-            <CardActions disableSpacing>
-                <IconButton aria-label="add to favorites">
-                </IconButton>
-                <IconButton aria-label="share">
-                </IconButton>
-            </CardActions>
-        </Card>
+                </CardContent>
+                <CardActions disableSpacing>
+                    <IconButton aria-label="add to favorites">
+                    </IconButton>
+                    <IconButton aria-label="share">
+                    </IconButton>
+                </CardActions>
+            </Card>
+        </div>
     )
 }
 

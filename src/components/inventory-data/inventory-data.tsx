@@ -227,7 +227,6 @@ const InventoryData = (props) => {
             props.inventoryData.filter(i => i.Site === props.site).map((x, index) => {
                 return { id: ++index, Name: x.Name, Count: x.Count, Price: x.Price, ExpirationDate: x.ExpirationDate, SkuNumber: x.SkuNumber };
             });
-
     }
 
 
