@@ -1,6 +1,7 @@
 export interface InventoryImage {
     imageSrc: string,
-    name: string
+    name: string,
+    measurement?: string
 }
 
 export interface InventoryItem {

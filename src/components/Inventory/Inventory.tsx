@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useReducer, Reducer, useContext } from "react";
-import { Select, FormControl, InputLabel, Container, Button, Input, CircularProgress, Card, CardHeader, CardMedia, CardContent, Typography, CardActions, IconButton, Grid, withStyles, makeStyles } from "@material-ui/core";
+import { Select, FormControl, InputLabel, Container, Button, Input, CircularProgress, Card, CardHeader, CardMedia, CardContent, Typography, CardActions, IconButton, Grid, withStyles, makeStyles, TextField, LinearProgress, LinearProgressProps, Box } from "@material-ui/core";
 import InventoryItem from "./inventory-item";
 import InventorySearchBar from "./inventory-search-bar";
 import { InventoryProvider, InventoryContext } from "./inventory-context";
@@ -17,6 +17,92 @@ import clsx from "clsx";
 import { setGridRowCountStateUpdate } from "@material-ui/data-grid";
 import { POINT_CONVERSION_UNCOMPRESSED } from "constants";
 
+function LinearProgressWithLabel(props: LinearProgressProps & { value: number } & { vitamin: any }) {
+
+    console.log('props', props);
+
+    return (
+        <Box display="flex" alignItems="center">
+            <Box width="100%" mr={1}>
+                <Typography variant="body2" color="textSecondary">{`${props.vitamin.vitamin}`}</Typography>
+                <LinearProgress variant="determinate" {...props} />
+            </Box>
+            <Box minWidth={35}>
+                <Typography variant="body2" color="textSecondary">{`${props.value}%`}</Typography>
+            </Box>
+        </Box>
+    );
+}
+
+function LinearWithValueLabel() {
+    //Put in backend, this will have to do for now
+    const appleNutritionFacts = [
+        {
+            apple: { vitamin: 'Potassium', percent: 5 }
+        },
+        {
+            apple: { vitamin: 'Sodium', percent: 0 },
+        },
+        {
+            apple: { vitamin: 'A', percent: 1 },
+        },
+        {
+            apple: { vitamin: 'C', percent: 14 },
+        },
+        {
+            apple: { vitamin: 'B6', percent: 5 },
+        }
+    ];
+
+
+    const useStyles = makeStyles({
+        root: {
+            width: '100%',
+        },
+    });
+
+    let initialArray: number[] = [0, 0, 0, 0, 0];
+    const [progress, setProgress] = React.useState<number[]>(initialArray);
+    const percentArray = appleNutritionFacts.map(x => x['apple'].percent);
+
+    useEffect(() => {
+        const timer = setInterval(() => {
+            appleNutritionFacts.map((vitamin, index) => {
+                progress[index] >= vitamin['apple'].percent ? progress.splice(index, 1, vitamin['apple'].percent) : progress.splice(index, 1, progress[index] + 1);
+                setProgress([...progress]);
+            });
+            if (compareArrays(progress, percentArray)) {
+                clearInterval(timer);
+            }
+        }, 150);
+    }, []);
+
+
+    function compareArrays(a: number[], b: number[]): boolean {
+        console.log('a', a);
+        console.log('b', b);
+
+        if (a.length !== b.length) {
+            return false;
+        }
+        for (let i = 0; i < a.length; i++) {
+            if (a[i] !== b[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    const classes = useStyles();
+
+    return (
+        <div className={classes.root}>
+            {appleNutritionFacts.map((vitamin, index) => {
+                return <LinearProgressWithLabel value={progress[index]} vitamin={vitamin['apple']} />
+            })}
+        </div>
+    )
+}
 
 
 function Inventory(props) {
@@ -62,8 +148,11 @@ function Inventory(props) {
         //api call needed here
     }
 
+
+
     return (
         <Container maxWidth="lg">
+            <LinearWithValueLabel></LinearWithValueLabel>
             <InventoryContainer>
                 <ConsumeInventory onClick={consumeInventory}>Consume</ConsumeInventory>
             </InventoryContainer>
@@ -131,10 +220,11 @@ const ItemCard = (props) => {
 
     let [count, setCount] = useState(0);
     const showChosen = ($event) => {
+        if ($event.target.name === 'measurement') {
+            return;
+        }
         setCount(++count);
-        console.log('event', $event);
-        console.log('props', props);
-        count % 2 == 1 ? props.itemFunctions.chooseItem($event.target.alt) : props.itemFunctions.removeItem($event.target.alt);
+        count % 2 === 1 ? props.itemFunctions.chooseItem($event.target.alt) : props.itemFunctions.removeItem($event.target.alt);
     }
 
     return (
@@ -158,13 +248,14 @@ const ItemCard = (props) => {
                         This impressive paella is a perfect party dish and a fun meal to cook together with your
                         guests. Add 1 cup of frozen peas along with the mussels, if you like.
                 </Typography>
+                    <TextField type='text'
+                        disabled={count % 2 === 0}
+                        name='measurement'
+                        label={props.inventoryImage.measurement}
+                        size='small'
+                        variant="outlined"
+                        style={{ marginTop: '5%', width: '50%' }} />
                 </CardContent>
-                <CardActions disableSpacing>
-                    <IconButton aria-label="add to favorites">
-                    </IconButton>
-                    <IconButton aria-label="share">
-                    </IconButton>
-                </CardActions>
             </Card>
         </div>
     )
