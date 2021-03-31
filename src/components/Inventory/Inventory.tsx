@@ -18,9 +18,6 @@ import { setGridRowCountStateUpdate } from "@material-ui/data-grid";
 import { POINT_CONVERSION_UNCOMPRESSED } from "constants";
 
 function LinearProgressWithLabel(props: LinearProgressProps & { value: number } & { vitamin: any }) {
-
-    console.log('props', props);
-
     return (
         <Box display="flex" alignItems="center">
             <Box width="100%" mr={1}>
@@ -50,7 +47,13 @@ function LinearWithValueLabel() {
             apple: { vitamin: 'C', percent: 14 },
         },
         {
+            apple: { vitamin: 'C', percent: 55 },
+        },
+        {
             apple: { vitamin: 'B6', percent: 5 },
+        },
+        {
+            apple: { vitamin: 'B6', percent: 26 },
         }
     ];
 
@@ -63,18 +66,38 @@ function LinearWithValueLabel() {
 
     let initialArray: number[] = [0, 0, 0, 0, 0];
     const [progress, setProgress] = React.useState<number[]>(initialArray);
-    const percentArray = appleNutritionFacts.map(x => x['apple'].percent);
+    const vitaminPercentCombo = appleNutritionFacts.flatMap(x => [x.apple]);
+    const lookup = vitaminPercentCombo.reduce((lookupTable, v) => {
+        lookupTable[v.vitamin] = ++lookupTable[v.vitamin] || 0;
+        return lookupTable;
+    }, {});
 
+    const vitaminPercentagesToSum = vitaminPercentCombo.filter(x => lookup[x.vitamin] >= 1);
+
+    const vitaminPercentArray = vitaminPercentagesToSum.reduce((aggregatedVitaminPercent, currentVitamin) => {
+        aggregatedVitaminPercent[currentVitamin.vitamin] = aggregatedVitaminPercent[currentVitamin.vitamin] + currentVitamin.percent || currentVitamin.percent;
+        return aggregatedVitaminPercent;
+    }, {});
+
+    let transformedVitaminPercentArr: any[] = [];
+    for (const [key, value] of Object.entries(vitaminPercentArray)) {
+        const obj = Object.assign({}, { vitamin: key, percent: value });
+        transformedVitaminPercentArr.push(obj);
+    }
+
+    const transformedVitaminPercentArray = [...vitaminPercentCombo.filter(x => !transformedVitaminPercentArr.map(y => y.vitamin).includes(x.vitamin)), ...transformedVitaminPercentArr];
     useEffect(() => {
         const timer = setInterval(() => {
-            appleNutritionFacts.map((vitamin, index) => {
-                progress[index] >= vitamin['apple'].percent ? progress.splice(index, 1, vitamin['apple'].percent) : progress.splice(index, 1, progress[index] + 1);
+            transformedVitaminPercentArray.map((vitamin, index) => {
+                progress[index] >= vitamin.percent
+                    ? progress.splice(index, 1, vitamin.percent)
+                    : progress.splice(index, 1, progress[index] + 1);
                 setProgress([...progress]);
             });
-            if (compareArrays(progress, percentArray)) {
+            if (compareArrays(progress, transformedVitaminPercentArray)) {
                 clearInterval(timer);
             }
-        }, 150);
+        }, 100);
     }, []);
 
 
@@ -97,8 +120,8 @@ function LinearWithValueLabel() {
 
     return (
         <div className={classes.root}>
-            {appleNutritionFacts.map((vitamin, index) => {
-                return <LinearProgressWithLabel value={progress[index]} vitamin={vitamin['apple']} />
+            {transformedVitaminPercentArray.map((vitamin, index) => {
+                return <LinearProgressWithLabel value={progress[index]} vitamin={vitamin} />
             })}
         </div>
     )
