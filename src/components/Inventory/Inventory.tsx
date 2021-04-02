@@ -33,7 +33,7 @@ function LinearProgressWithLabel(props: LinearProgressProps & { value: number } 
 
 function LinearWithValueLabel() {
     //Put in backend, this will have to do for now
-    const appleNutritionFacts = [
+    const nutritionFacts = [
         {
             apple: { vitamin: 'Potassium', percent: 5 }
         },
@@ -53,7 +53,13 @@ function LinearWithValueLabel() {
             apple: { vitamin: 'B6', percent: 5 },
         },
         {
-            apple: { vitamin: 'B6', percent: 26 },
+            beet: { vitamin: 'B6', percent: 26 },
+        },
+        {
+            beet: { vitamin: 'Calcium', percent: 2 },
+        },
+        {
+            beet: { vitamin: 'C', percent: 11 },
         }
     ];
 
@@ -64,9 +70,16 @@ function LinearWithValueLabel() {
         },
     });
 
-    let initialArray: number[] = [0, 0, 0, 0, 0];
+    let initialArray: number[] = [];
+    for (let i = 0; i < nutritionFacts.length; i++) {
+        initialArray.push(0);
+    }
     const [progress, setProgress] = React.useState<number[]>(initialArray);
-    const vitaminPercentCombo = appleNutritionFacts.flatMap(x => [x.apple]);
+    const vitaminPercentCombo = nutritionFacts.flatMap(x => {
+        const inventoryName = Object.getOwnPropertyNames(x)[0];
+        return [x[inventoryName]];
+    });
+    console.log('vitaminPercentCombo', vitaminPercentCombo);
     const lookup = vitaminPercentCombo.reduce((lookupTable, v) => {
         lookupTable[v.vitamin] = ++lookupTable[v.vitamin] || 0;
         return lookupTable;
@@ -85,7 +98,10 @@ function LinearWithValueLabel() {
         transformedVitaminPercentArr.push(obj);
     }
 
+    //Add the summed up vitamins back into the original array
     const transformedVitaminPercentArray = [...vitaminPercentCombo.filter(x => !transformedVitaminPercentArr.map(y => y.vitamin).includes(x.vitamin)), ...transformedVitaminPercentArr];
+    console.log('transformedVitaminPercentArr', transformedVitaminPercentArr);
+
     useEffect(() => {
         const timer = setInterval(() => {
             transformedVitaminPercentArray.map((vitamin, index) => {
