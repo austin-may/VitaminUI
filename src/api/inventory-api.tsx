@@ -1,6 +1,6 @@
 import SelectInput from "@material-ui/core/Select/SelectInput";
 import { SSL_OP_EPHEMERAL_RSA } from "constants";
-import { InventoryItem } from "../models/inventory-models";
+import { InventoryConsumed, InventoryItem } from "../models/inventory-models";
 
 export async function getInventoryAsync(): Promise<any> {
     const axios = require('axios');
@@ -42,6 +42,29 @@ export async function createInventoryAsync(newInventory: InventoryItem): Promise
             newInventory
         }
     }).then(result => {
+        return result.data.data
+    })
+}
+
+export async function consumeInventoryAsync(inventoryConsumed: InventoryConsumed[]): Promise<any> {
+    const axios = require('axios');
+    return await axios.post('http://localhost:8080/query', {
+        query: `
+                query Consume($inventoryConsumed: [InventoryConsumed!]) {
+                    vitaminNutritionFacts(inventoryConsumed: $inventoryConsumed) {
+                        InventoryName,
+                        NutritionFact {
+                            Vitamin,
+                            Percent
+                        }
+                    }
+                }
+            `,
+        variables: {
+            inventoryConsumed
+        }
+    }).then(result => {
+        console.log(result);
         return result.data.data
     })
 }

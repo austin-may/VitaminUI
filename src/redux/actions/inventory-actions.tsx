@@ -1,7 +1,7 @@
 import * as actionTypes from './actionTypes';
 import * as inventoryApi from '../../api/inventory-api';
 import { store } from 'react-notifications-component';
-import { InventoryItem } from '../../models/inventory-models';
+import { InventoryConsumed, InventoryItem } from '../../models/inventory-models';
 
 const initialInventoryState = { Name: '', Count: 0 }
 
@@ -22,6 +22,15 @@ export function getInventoryError(err) {
     return { type: actionTypes.LOAD_INVENTORY_FAILURE, err }
 }
 
+export function getNutritionSuccess(inventoryState) {
+    return { type: actionTypes.CONSUME_INVENTORY_SUCCESS, inventoryState }
+}
+
+export function getNutritionError(err) {
+    return { type: actionTypes.CONSUME_INVENTORY_FAILURE, err }
+}
+
+
 export function loadInventory() {
     return async function onLoad(dispatch) { //every thunk returns a function that accepts dispatch as an argument. Redux thunk injects dispatch so we don't have to.
         try {
@@ -33,7 +42,6 @@ export function loadInventory() {
             const response: any = await inventoryApi.getInventoryAsync()
             return onSuccess(response.data.data);
         } catch (error) {
-            console.log(error);
             return onError(error);
         }
         function onSuccess(result) {
@@ -75,9 +83,7 @@ export function addInventory(inventoryItem: InventoryItem) {
     return async function (dispatch) {
         try {
             dispatch({ type: actionTypes.ADD_INVENTORY, inventoryState: {} });
-            console.log('theeeee inv item', inventoryItem);
             const result = await inventoryApi.createInventoryAsync(inventoryItem);
-            console.log('thee result was;', result);
             dispatch(addInventorySuccess(result))
         } catch (err) {
             dispatch(addInventoryError(err))
@@ -86,8 +92,19 @@ export function addInventory(inventoryItem: InventoryItem) {
 }
 
 export function setSite(site: string) {
-    console.log('site:', site);
     return function (dispatch) {
         dispatch({ type: actionTypes.SET_SITE, inventoryState: site })
+    }
+}
+
+export function consumeInventory(inventoryConsumed: InventoryConsumed[]) {
+    return async function (dispatch) {
+        try {
+            dispatch({ type: actionTypes.CONSUME_INVENTORY, inventoryState: {} });
+            const result = await inventoryApi.consumeInventoryAsync(inventoryConsumed);
+            dispatch(getNutritionSuccess(result))
+        } catch (err) {
+            dispatch(getNutritionError(err))
+        }
     }
 }

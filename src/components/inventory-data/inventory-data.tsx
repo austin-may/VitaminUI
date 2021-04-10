@@ -44,7 +44,6 @@ const InventoryForm = ({ props }) => {
     function handleSubmit(event) {
         event.preventDefault();
         const formData = new FormData(event.target as HTMLFormElement);
-        console.log('formData', formData);
         const Count = formData.get('count');
         const Price = formData.get('price');
         const ExpirationDate = formData.get('expirationDate');

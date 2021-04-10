@@ -12,3 +12,9 @@ export interface InventoryItem {
     Site: string,
     SkuNumber: string
 }
+
+export interface InventoryConsumed {
+    Name: string,
+    Amount: string,
+    Measurement: string
+}

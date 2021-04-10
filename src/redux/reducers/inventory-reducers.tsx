@@ -3,7 +3,8 @@ import { Reducer } from "react"
 
 const initialState = {
     inventory: [],
-    site: 'All'
+    site: 'All',
+    vitaminNutritionFacts: []
 }
 
 export const inventoryStore: Reducer<any, any> = (state: any = {}, action: any = {}) => {
@@ -20,6 +21,18 @@ export const inventoryStore: Reducer<any, any> = (state: any = {}, action: any =
                 inventory: [...state.inventory, { ...action.inventoryState.createInventory }],
                 status: actionTypes.REQUEST_STATUS.SUCCESS
             }
+        case actionTypes.CONSUME_INVENTORY:
+            return {
+                ...state,
+                status: actionTypes.VITAMIN_REQUEST_STATUS.LOADING
+            }
+        case actionTypes.CONSUME_INVENTORY_SUCCESS:
+            console.log('consumed success', action);
+            return {
+                ...state,
+                vitaminNutritionFacts: action.inventoryState.vitaminNutritionFacts,
+                status: actionTypes.VITAMIN_REQUEST_STATUS.SUCCESS
+            }
         case actionTypes.LOAD_INVENTORY:
             return {
                 ...state,
@@ -32,6 +45,7 @@ export const inventoryStore: Reducer<any, any> = (state: any = {}, action: any =
                 inventory: action.inventoryState.inventory,
                 status: actionTypes.REQUEST_STATUS.SUCCESS
             };
+        case actionTypes.CONSUME_INVENTORY_FAILURE:
         case actionTypes.ADD_INVENTORY_FAILURE:
         case actionTypes.LOAD_INVENTORY_FAILURE:
             return {

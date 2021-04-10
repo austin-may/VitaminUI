@@ -21,7 +21,7 @@ function LinearProgressWithLabel(props: LinearProgressProps & { value: number } 
     return (
         <Box display="flex" alignItems="center">
             <Box width="100%" mr={1}>
-                <Typography variant="body2" color="textSecondary">{`${props.vitamin.vitamin}`}</Typography>
+                <Typography variant="body2" color="textSecondary">{`${props.vitamin.Vitamin}`}</Typography>
                 <LinearProgress variant="determinate" {...props} />
             </Box>
             <Box minWidth={35}>
@@ -31,39 +31,7 @@ function LinearProgressWithLabel(props: LinearProgressProps & { value: number } 
     );
 }
 
-function LinearWithValueLabel() {
-    //Put in backend, this will have to do for now
-    const nutritionFacts = [
-        {
-            apple: { vitamin: 'Potassium', percent: 5 }
-        },
-        {
-            apple: { vitamin: 'Sodium', percent: 0 },
-        },
-        {
-            apple: { vitamin: 'A', percent: 1 },
-        },
-        {
-            apple: { vitamin: 'C', percent: 14 },
-        },
-        {
-            apple: { vitamin: 'C', percent: 55 },
-        },
-        {
-            apple: { vitamin: 'B6', percent: 5 },
-        },
-        {
-            beet: { vitamin: 'B6', percent: 26 },
-        },
-        {
-            beet: { vitamin: 'Calcium', percent: 2 },
-        },
-        {
-            beet: { vitamin: 'C', percent: 11 },
-        }
-    ];
-
-
+function VitaminProgressBars({ props }) {
     const useStyles = makeStyles({
         root: {
             width: '100%',
@@ -71,46 +39,47 @@ function LinearWithValueLabel() {
     });
 
     let initialArray: number[] = [];
-    for (let i = 0; i < nutritionFacts.length; i++) {
+
+    for (let i = 0; i < props.vitaminNutritionFacts.length; i++) {
         initialArray.push(0);
     }
     const [progress, setProgress] = React.useState<number[]>(initialArray);
-    const vitaminPercentCombo = nutritionFacts.flatMap(x => {
-        const inventoryName = Object.getOwnPropertyNames(x)[0];
-        return [x[inventoryName]];
-    });
-    console.log('vitaminPercentCombo', vitaminPercentCombo);
+    const vitaminPercentCombo = props.vitaminNutritionFacts.flatMap(x => x.NutritionFact);
+    //console.log('vitaminPercentCombo', vitaminPercentCombo);
     const lookup = vitaminPercentCombo.reduce((lookupTable, v) => {
-        lookupTable[v.vitamin] = ++lookupTable[v.vitamin] || 0;
+        lookupTable[v.Vitamin] = ++lookupTable[v.Vitamin] || 0;
         return lookupTable;
     }, {});
 
-    const vitaminPercentagesToSum = vitaminPercentCombo.filter(x => lookup[x.vitamin] >= 1);
+    const vitaminPercentagesToSum = vitaminPercentCombo.filter(x => lookup[x.Vitamin] >= 1);
 
     const vitaminPercentArray = vitaminPercentagesToSum.reduce((aggregatedVitaminPercent, currentVitamin) => {
-        aggregatedVitaminPercent[currentVitamin.vitamin] = aggregatedVitaminPercent[currentVitamin.vitamin] + currentVitamin.percent || currentVitamin.percent;
+        aggregatedVitaminPercent[currentVitamin.Vitamin] = aggregatedVitaminPercent[currentVitamin.Vitamin] + currentVitamin.Percent || currentVitamin.Percent;
         return aggregatedVitaminPercent;
     }, {});
 
     let transformedVitaminPercentArr: any[] = [];
     for (const [key, value] of Object.entries(vitaminPercentArray)) {
-        const obj = Object.assign({}, { vitamin: key, percent: value });
+        const obj = Object.assign({}, { Vitamin: key, Percent: value });
         transformedVitaminPercentArr.push(obj);
     }
 
     //Add the summed up vitamins back into the original array
-    const transformedVitaminPercentArray = [...vitaminPercentCombo.filter(x => !transformedVitaminPercentArr.map(y => y.vitamin).includes(x.vitamin)), ...transformedVitaminPercentArr];
-    console.log('transformedVitaminPercentArr', transformedVitaminPercentArr);
+    const transformedVitaminPercentArray = [...vitaminPercentCombo.filter(x => !transformedVitaminPercentArr.map(y => y.Vitamin).includes(x.Vitamin)), ...transformedVitaminPercentArr];
 
     useEffect(() => {
         const timer = setInterval(() => {
+            setTimeout(() => clearInterval(timer), 20000);
             transformedVitaminPercentArray.map((vitamin, index) => {
-                progress[index] >= vitamin.percent
-                    ? progress.splice(index, 1, vitamin.percent)
-                    : progress.splice(index, 1, progress[index] + 1);
+                progress[index] >= 100 ?
+                    progress.splice(index, 1, 100)
+                    :
+                    progress[index] >= vitamin.Percent
+                        ? progress.splice(index, 1, vitamin.Percent)
+                        : progress.splice(index, 1, progress[index] + 1);
                 setProgress([...progress]);
             });
-            if (compareArrays(progress, transformedVitaminPercentArray)) {
+            if (compareArrays(progress, transformedVitaminPercentArray.map(x => x.Percent))) {
                 clearInterval(timer);
             }
         }, 100);
@@ -118,9 +87,7 @@ function LinearWithValueLabel() {
 
 
     function compareArrays(a: number[], b: number[]): boolean {
-        console.log('a', a);
-        console.log('b', b);
-
+        console.log('a+b', a, b);
         if (a.length !== b.length) {
             return false;
         }
@@ -158,6 +125,9 @@ function Inventory(props) {
     const isLoading = props.status === actionTypes.REQUEST_STATUS.LOADING;
     const isSuccess = props.status === actionTypes.REQUEST_STATUS.SUCCESS;
     const isError = props.status === actionTypes.REQUEST_STATUS.ERROR;
+    const isVitaminLoading = props.status === actionTypes.VITAMIN_REQUEST_STATUS.LOADING;
+    const isVitaminSuccess = props.status === actionTypes.VITAMIN_REQUEST_STATUS.SUCCESS;
+    const isVitaminError = props.status === actionTypes.VITAMIN_REQUEST_STATUS.ERROR;
 
     const [inventoryChosen, setInventoryChosen] = useState([]);
 
@@ -184,25 +154,26 @@ function Inventory(props) {
 
     function consumeInventory() {
         console.log('sending following selections to be consumed:', inventoryChosen);
-        //api call needed here
+        props.consumeInventory(inventoryChosen);
     }
-
-
 
     return (
         <Container maxWidth="lg">
-            <LinearWithValueLabel></LinearWithValueLabel>
+            {isVitaminLoading && <CircularProgress />}
+            {
+                isVitaminSuccess && <VitaminProgressBars props={props}></VitaminProgressBars>
+            }
             <InventoryContainer>
                 <ConsumeInventory onClick={consumeInventory}>Consume</ConsumeInventory>
             </InventoryContainer>
             <InventorySearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
             {isLoading && <CircularProgress />}
             {
-                isSuccess &&
+                (isSuccess || isVitaminSuccess) &&
                 <InventoryComponent searchQuery={searchQuery} inventory={props.inventory} gatherSelections={gatherSelections}></InventoryComponent>
             }
             {errors && <span>{errors.name}</span>}
-            {isError && <p>Error occured! {props.error}</p>}
+            {(isError || isVitaminError) && <p>Error occured! {props.error}</p>}
         </Container>
     )
 }
@@ -210,10 +181,17 @@ function Inventory(props) {
 const InventoryComponent = (props: any) => {
     const inventoryNames = props.inventory.map((i: any) => i.Name);
 
-    const [itemsSelected, setItemsSelected] = useState<string[]>([]);
+    const [itemsSelected, setItemsSelected] = useState<any[]>([]);
 
-    const chooseItem = (item: string) => {
-        setItemsSelected([...itemsSelected, item]);
+    const chooseItem = (item: any) => {
+        console.log('itemsSelected', itemsSelected);
+        const indexOfItem = itemsSelected.findIndex(x => x.Name === item.Name);
+        if (indexOfItem > -1) {
+            itemsSelected[indexOfItem].Amount = item.Amount;
+            setItemsSelected([...itemsSelected]);
+        } else {
+            setItemsSelected([...itemsSelected, item]);
+        }
     }
 
     const removeItem = (item: string) => {
@@ -263,7 +241,12 @@ const ItemCard = (props) => {
             return;
         }
         setCount(++count);
-        count % 2 === 1 ? props.itemFunctions.chooseItem($event.target.alt) : props.itemFunctions.removeItem($event.target.alt);
+        //count % 2 === 1 ? props.itemFunctions.chooseItem({ name: $event.target.alt }) : props.itemFunctions.removeItem($event.target.alt);
+    }
+
+    const measurementInput = (amount: string, measurementObj: any) => {
+        console.log('austin may', amount, measurementObj);
+        props.itemFunctions.chooseItem({ Amount: amount, Name: measurementObj.name, Measurement: measurementObj.measurement });
     }
 
     return (
@@ -286,14 +269,15 @@ const ItemCard = (props) => {
                     <Typography variant="body2" color="textSecondary" component="p">
                         This impressive paella is a perfect party dish and a fun meal to cook together with your
                         guests. Add 1 cup of frozen peas along with the mussels, if you like.
-                </Typography>
+                    </Typography>
                     <TextField type='text'
                         disabled={count % 2 === 0}
                         name='measurement'
                         label={props.inventoryImage.measurement}
                         size='small'
                         variant="outlined"
-                        style={{ marginTop: '5%', width: '50%' }} />
+                        style={{ marginTop: '5%', width: '50%' }}
+                        onChange={(e) => measurementInput(e.target.value, { name: props.id, measurement: props.inventoryImage.measurement })} />
                 </CardContent>
             </Card>
         </div>
@@ -306,17 +290,18 @@ Inventory.propTypes = {
 
 // Determines what state is passed to our component via props
 function mapStateToProps(state) {
-    const { inventory, status } = state.inventoryStore;
+    const { inventory, status, vitaminNutritionFacts } = state.inventoryStore;
     return {
         inventory: inventory,
-        status
+        status,
+        vitaminNutritionFacts
     }
 }
 
 // What actions we want to expose on our component
 const mapDispatchToProps = {
     loadInventory: inventoryActions.loadInventory,
-    addInventory: inventoryActions.addInventory
+    consumeInventory: inventoryActions.consumeInventory
 }
 
 //when we omit mapDispatchToProps, our component gets a dispatch prop injected automatically
