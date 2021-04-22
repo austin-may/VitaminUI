@@ -1,7 +1,8 @@
 import React from 'react';
 import { AppBar, Tabs, Tab, Box } from "@material-ui/core";
 import Inventory from '../inventory/inventory';
-import InventoryData from '../inventory-data/inventory-data';
+import Components from '../inventory-data/inventory-data';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 
 interface TabPanelProps {
     children?: React.ReactNode;
@@ -40,7 +41,16 @@ function Header() {
                 </Tabs>
             </AppBar>
             <TabPanel value={value} index={0}>
-                <InventoryData />
+                <Router>
+                    <Switch>
+                        <Route path='/' exact>
+                            <Components.ConnectedInventoryData />
+                        </Route>
+                        <Route path='/nutritionFacts/:inventoryName'>
+                            <Components.ConnectedNutritionInfoForInventoryItem />
+                        </Route>
+                    </Switch>
+                </Router>
             </TabPanel>
             <TabPanel value={value} index={1}>
                 <Inventory />

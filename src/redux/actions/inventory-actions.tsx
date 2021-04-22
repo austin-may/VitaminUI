@@ -22,12 +22,20 @@ export function getInventoryError(err) {
     return { type: actionTypes.LOAD_INVENTORY_FAILURE, err }
 }
 
-export function getNutritionSuccess(inventoryState) {
+export function getNutritionConsumptionSuccess(inventoryState) {
     return { type: actionTypes.CONSUME_INVENTORY_SUCCESS, inventoryState }
 }
 
-export function getNutritionError(err) {
+export function getNutritionConsumptionError(err) {
     return { type: actionTypes.CONSUME_INVENTORY_FAILURE, err }
+}
+
+export function getNutritionByInventoryIdSuccess(inventoryState) {
+    return { type: actionTypes.LOAD_NUTRITION_INFO_SUCCESS, inventoryState }
+}
+
+export function getNutritionByInventoryIdError(err) {
+    return { type: actionTypes.LOAD_NUTRITION_INFO_FAILURE, err }
 }
 
 
@@ -102,9 +110,21 @@ export function consumeInventory(inventoryConsumed: InventoryConsumed[]) {
         try {
             dispatch({ type: actionTypes.CONSUME_INVENTORY, inventoryState: {} });
             const result = await inventoryApi.consumeInventoryAsync(inventoryConsumed);
-            dispatch(getNutritionSuccess(result))
+            dispatch(getNutritionConsumptionSuccess(result))
         } catch (err) {
-            dispatch(getNutritionError(err))
+            dispatch(getNutritionConsumptionError(err))
+        }
+    }
+}
+
+export function loadNutritionInfo(inventoryId: number) {
+    return async function (dispatch) {
+        try {
+            dispatch({ type: actionTypes.LOAD_NUTRITION_INFO, inventoryState: {} });
+            const result = await inventoryApi.loadNutritionInfoByInventoryIdAsync(inventoryId);
+            dispatch(getNutritionByInventoryIdSuccess(result))
+        } catch (err) {
+            dispatch(getNutritionByInventoryIdError(err))
         }
     }
 }

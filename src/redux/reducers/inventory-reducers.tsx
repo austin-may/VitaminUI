@@ -4,7 +4,8 @@ import { Reducer } from "react"
 const initialState = {
     inventory: [],
     site: 'All',
-    vitaminNutritionFacts: []
+    vitaminNutritionFacts: [],
+    nutritionInfoData: []
 }
 
 export const inventoryStore: Reducer<any, any> = (state: any = {}, action: any = {}) => {
@@ -27,10 +28,21 @@ export const inventoryStore: Reducer<any, any> = (state: any = {}, action: any =
                 status: actionTypes.VITAMIN_REQUEST_STATUS.LOADING
             }
         case actionTypes.CONSUME_INVENTORY_SUCCESS:
-            console.log('consumed success', action);
             return {
                 ...state,
                 vitaminNutritionFacts: action.inventoryState.vitaminNutritionFacts,
+                status: actionTypes.VITAMIN_REQUEST_STATUS.SUCCESS
+            }
+        case actionTypes.LOAD_NUTRITION_INFO:
+            return {
+                ...state,
+                status: actionTypes.VITAMIN_REQUEST_STATUS.LOADING
+            }
+        case actionTypes.LOAD_NUTRITION_INFO_SUCCESS:
+            console.log('SAMANTHA GARMON WILL BE MY WIFE', action)
+            return {
+                ...state,
+                nutritionInfoData: action.inventoryState.nutritionFactsByInventoryId,
                 status: actionTypes.VITAMIN_REQUEST_STATUS.SUCCESS
             }
         case actionTypes.LOAD_INVENTORY:

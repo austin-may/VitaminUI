@@ -68,3 +68,26 @@ export async function consumeInventoryAsync(inventoryConsumed: InventoryConsumed
         return result.data.data
     })
 }
+
+export async function loadNutritionInfoByInventoryIdAsync(inventoryId: number): Promise<any> {
+    const axios = require('axios');
+    return await axios.post('http://localhost:8080/query', {
+        query: `
+            query GetNutritionInfoByInventoryId($inventoryId: Int!) {
+                nutritionFactsByInventoryId(inventoryId: $inventoryId) {
+                    InventoryName,
+                    NutritionFact {
+                        Vitamin,
+                        Percent
+                    }
+                }
+            }
+            `,
+        variables: {
+            inventoryId
+        }
+    }).then(result => {
+        console.log(result);
+        return result.data.data
+    })
+}

@@ -245,7 +245,6 @@ const ItemCard = (props) => {
     }
 
     const measurementInput = (amount: string, measurementObj: any) => {
-        console.log('austin may', amount, measurementObj);
         props.itemFunctions.chooseItem({ Amount: amount, Name: measurementObj.name, Measurement: measurementObj.measurement });
     }
 

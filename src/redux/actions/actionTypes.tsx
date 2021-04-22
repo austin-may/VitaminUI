@@ -8,6 +8,9 @@ export const SET_SITE = 'Set Site';
 export const CONSUME_INVENTORY = 'Get Nutrition from Consumption';
 export const CONSUME_INVENTORY_SUCCESS = 'Get Nutrition from Consumption Succeeded';
 export const CONSUME_INVENTORY_FAILURE = 'Get Nutrition from Consumption Failure';
+export const LOAD_NUTRITION_INFO = 'Get Nutrition from Inventory';
+export const LOAD_NUTRITION_INFO_SUCCESS = 'Get Nutrition from Inventory Succeeded';
+export const LOAD_NUTRITION_INFO_FAILURE = 'Get Nutrition from Inventory Failure';
 
 
 export const REQUEST_STATUS = {

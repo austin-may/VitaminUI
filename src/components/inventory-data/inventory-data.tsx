@@ -11,6 +11,7 @@ import styled from 'styled-components';
 import { Send } from "@material-ui/icons";
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import clsx from "clsx";
+import { useHistory } from 'react-router-dom';
 
 const InventoryForm = ({ props }) => {
     const { addInventory, setOpenDialog } = props;
@@ -187,7 +188,7 @@ const InventoryData = (props) => {
     // const [countFromAddDialog, setCountFromAddDialog] = useState(0);
     // const [siteFromAddDialog, setSiteFromAddDialog] = useState('');
 
-
+    console.log('where is this props coming from?', props);
 
     useEffect(() => {
         loadInventory();
@@ -238,6 +239,8 @@ const InventoryData = (props) => {
     const isError = props.status === actionTypes.REQUEST_STATUS.ERROR;
 
     const classes = useStyles();
+    const history = useHistory();
+    console.log('history', history);
 
     return (
         <Container maxWidth="md">
@@ -265,7 +268,10 @@ const InventoryData = (props) => {
                         </SiteSelection>
                     </InventoryDataContainer>
                     <div style={{ display: 'flex', height: 500 }} className={classes.root}>
-                        <DataGrid rows={rows} columns={columns}></DataGrid>
+                        <DataGrid rows={rows} columns={columns} onRowClick={(e) => {
+                            console.log('eventyoooooo', e.row);
+                            history.push(`/nutritionFacts/${e.row.Name}`)
+                        }}></DataGrid>
                     </div>
                 </div>
             }
@@ -273,19 +279,68 @@ const InventoryData = (props) => {
     )
 }
 
+export const NutritionFacts = (props) => {
+
+    const { loadNutritionInfo } = props;
+
+    props.nutritionInfoData.map(x => x.NutritionFact).map(y => {
+        console.log(y.Vitamin);
+    });
+
+
+    useEffect(() => {
+        loadNutritionInfo(12);
+    }, [])
+
+    const NutritionFactsContainer = withStyles({
+        root: {
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'space-between'
+        },
+    })(Container);
+    //Will need an api to GET
+    //And another one to ADD
+    const history = useHistory();
+    return (
+        <Container maxWidth="md">
+            <Button onClick={() => history.goBack()}>Back</Button>
+            <NutritionFactsContainer>
+                {props.nutritionInfoData.map(x => x.NutritionFact).map(y => {
+                    return <TextField
+                        id={y.Vitamin}
+                        label={y.Vitamin}
+                        type="text"
+                        variant="outlined"
+                        value={y.Percent}
+                    />
+                })}
+
+            </NutritionFactsContainer>
+            <Button>Add nutrition facts</Button>
+        </Container>
+
+    )
+}
+
 function mapStateToProps(state) {
-    const { inventory, status, site } = state.inventoryStore;
+    const { inventory, status, site, nutritionInfoData } = state.inventoryStore;
     return {
         inventoryData: inventory,
         site,
-        status
+        status,
+        nutritionInfoData
     }
 }
 
 const mapDispatchToProps = {
     loadInventory: inventoryActions.loadInventory,
     addInventory: inventoryActions.addInventory,
+    loadNutritionInfo: inventoryActions.loadNutritionInfo,
     setSite: inventoryActions.setSite
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(InventoryData);
+export default {
+    ConnectedInventoryData: connect(mapStateToProps, mapDispatchToProps)(InventoryData),
+    ConnectedNutritionInfoForInventoryItem: connect(mapStateToProps, mapDispatchToProps)(NutritionFacts)
+}
