@@ -38,6 +38,14 @@ export function getNutritionByInventoryIdError(err) {
     return { type: actionTypes.LOAD_NUTRITION_INFO_FAILURE, err }
 }
 
+export function loadVitaminSuccess(inventoryState) {
+    return { type: actionTypes.LOAD_VITAMINS_SUCCESS, inventoryState }
+}
+
+export function loadVitaminError(err) {
+    return { type: actionTypes.LOAD_VITAMINS_FAILURE, err }
+}
+
 
 export function loadInventory() {
     return async function onLoad(dispatch) { //every thunk returns a function that accepts dispatch as an argument. Redux thunk injects dispatch so we don't have to.
@@ -125,6 +133,18 @@ export function loadNutritionInfo(inventoryId: number) {
             dispatch(getNutritionByInventoryIdSuccess(result))
         } catch (err) {
             dispatch(getNutritionByInventoryIdError(err))
+        }
+    }
+}
+
+export function loadVitamins() {
+    return async function (dispatch) {
+        try {
+            dispatch({ type: actionTypes.LOAD_INVENTORY, inventoryState: {} });
+            const result = await inventoryApi.loadVitamins();
+            dispatch(loadVitaminSuccess(result));
+        } catch (err) {
+            dispatch(loadVitaminError(err))
         }
     }
 }

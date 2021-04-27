@@ -11,6 +11,9 @@ export const CONSUME_INVENTORY_FAILURE = 'Get Nutrition from Consumption Failure
 export const LOAD_NUTRITION_INFO = 'Get Nutrition from Inventory';
 export const LOAD_NUTRITION_INFO_SUCCESS = 'Get Nutrition from Inventory Succeeded';
 export const LOAD_NUTRITION_INFO_FAILURE = 'Get Nutrition from Inventory Failure';
+export const LOAD_VITAMINS = 'Get Vitamins';
+export const LOAD_VITAMINS_SUCCESS = 'Get Vitamins Success';
+export const LOAD_VITAMINS_FAILURE = 'Get Vitamins Failure';
 
 
 export const REQUEST_STATUS = {

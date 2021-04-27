@@ -11,7 +11,7 @@ import styled from 'styled-components';
 import { Send } from "@material-ui/icons";
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import clsx from "clsx";
-import { useHistory } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 
 const InventoryForm = ({ props }) => {
     const { addInventory, setOpenDialog } = props;
@@ -137,6 +137,76 @@ const InventoryForm = ({ props }) => {
     )
 }
 
+const VitaminForm = ({ props }) => {
+
+    console.log('vitaminForm', props);
+
+    useEffect(() => {
+        props.loadVitamins();
+    }, [])
+
+    const { loadVitamins, vitamins } = props;
+
+    const isLoading = props.status === actionTypes.REQUEST_STATUS.LOADING;
+    const isSuccess = props.status === actionTypes.REQUEST_STATUS.SUCCESS;
+    const isError = props.status === actionTypes.REQUEST_STATUS.ERROR;
+
+    const FormContainer = styled.div`
+    height: 550px;
+    width: 350px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;    
+  `;
+
+    const VitaminFormButton = withStyles({
+        root: {
+            background: 'red',
+            borderRadius: 3,
+            border: 0,
+            color: 'white',
+            height: 48,
+            padding: '0 30px',
+            flex: '0 0 40px',
+            width: '25%',
+            alignSelf: 'flex-end'
+        },
+        label: {
+            textTransform: 'capitalize',
+        },
+    })(Button);
+
+    let Name: string | null = '';
+    function handleSubmit(event) {
+        event.preventDefault();
+        const formData = new FormData(event.target as HTMLFormElement);
+
+        //if (!formIsValid()) return;
+    }
+
+    return (
+        <form onSubmit={handleSubmit}>
+            {isLoading && <CircularProgress></CircularProgress>}
+            {isSuccess && <FormContainer>
+                {vitamins.map(x => {
+                    return <TextField type='text'
+                        name={x.VitaminType}
+                        label={x.VitaminType}
+                        variant="outlined" />
+                })}
+                <VitaminFormButton
+                    variant="contained"
+                    color="primary"
+                    type='submit'
+                    endIcon={<Send></Send>}>
+                    Send
+                </VitaminFormButton>
+            </FormContainer>}
+        </form>
+
+    )
+}
+
 
 const AddInventoryDialog = (dialogProps) => {
     const { open, formProps } = dialogProps;
@@ -221,11 +291,11 @@ const InventoryData = (props) => {
 
     if (props.inventoryData && props.inventoryData.length > 0 && props.site !== undefined) {
         rows = props.site === 'All' ? props.inventoryData.map((x, index) => {
-            return { id: ++index, Name: x.Name, Count: x.Count, Price: x.Price, ExpirationDate: x.ExpirationDate, SkuNumber: x.SkuNumber };
+            return { id: ++index, InventoryId: x.InventoryId, Name: x.Name, Count: x.Count, Price: x.Price, ExpirationDate: x.ExpirationDate, SkuNumber: x.SkuNumber };
         })
             :
             props.inventoryData.filter(i => i.Site === props.site).map((x, index) => {
-                return { id: ++index, Name: x.Name, Count: x.Count, Price: x.Price, ExpirationDate: x.ExpirationDate, SkuNumber: x.SkuNumber };
+                return { id: ++index, InventoryId: x.InventoryId, Name: x.Name, Count: x.Count, Price: x.Price, ExpirationDate: x.ExpirationDate, SkuNumber: x.SkuNumber };
             });
     }
 
@@ -240,7 +310,6 @@ const InventoryData = (props) => {
 
     const classes = useStyles();
     const history = useHistory();
-    console.log('history', history);
 
     return (
         <Container maxWidth="md">
@@ -269,8 +338,7 @@ const InventoryData = (props) => {
                     </InventoryDataContainer>
                     <div style={{ display: 'flex', height: 500 }} className={classes.root}>
                         <DataGrid rows={rows} columns={columns} onRowClick={(e) => {
-                            console.log('eventyoooooo', e.row);
-                            history.push(`/nutritionFacts/${e.row.Name}`)
+                            history.push(`/nutritionFacts/${e.row.InventoryId}`)
                         }}></DataGrid>
                     </div>
                 </div>
@@ -282,14 +350,11 @@ const InventoryData = (props) => {
 export const NutritionFacts = (props) => {
 
     const { loadNutritionInfo } = props;
-
-    props.nutritionInfoData.map(x => x.NutritionFact).map(y => {
-        console.log(y.Vitamin);
-    });
-
+    const { inventoryId } = useParams();
+    const [openNutritionDialog, setOpenNutritionDialog] = useState(false);
 
     useEffect(() => {
-        loadNutritionInfo(12);
+        loadNutritionInfo(inventoryId);
     }, [])
 
     const NutritionFactsContainer = withStyles({
@@ -312,24 +377,34 @@ export const NutritionFacts = (props) => {
                         label={y.Vitamin}
                         type="text"
                         variant="outlined"
-                        value={y.Percent}
+                        value={y.Percent + '%'}
                     />
                 })}
 
             </NutritionFactsContainer>
-            <Button>Add nutrition facts</Button>
+            <Button onClick={() => setOpenNutritionDialog(true)}>Add nutrition facts</Button>
+            <VitaminDialog open={openNutritionDialog} props={props}></VitaminDialog>
         </Container>
 
     )
 }
 
+const VitaminDialog = (props) => {
+    return (
+        <Dialog open={props.open}>
+            <VitaminForm props={props.props} />
+        </Dialog>
+    )
+}
+
 function mapStateToProps(state) {
-    const { inventory, status, site, nutritionInfoData } = state.inventoryStore;
+    const { inventory, status, site, nutritionInfoData, vitamins } = state.inventoryStore;
     return {
         inventoryData: inventory,
         site,
         status,
-        nutritionInfoData
+        nutritionInfoData,
+        vitamins
     }
 }
 
@@ -337,6 +412,7 @@ const mapDispatchToProps = {
     loadInventory: inventoryActions.loadInventory,
     addInventory: inventoryActions.addInventory,
     loadNutritionInfo: inventoryActions.loadNutritionInfo,
+    loadVitamins: inventoryActions.loadVitamins,
     setSite: inventoryActions.setSite
 }
 

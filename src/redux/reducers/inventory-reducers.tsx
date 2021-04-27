@@ -5,7 +5,8 @@ const initialState = {
     inventory: [],
     site: 'All',
     vitaminNutritionFacts: [],
-    nutritionInfoData: []
+    nutritionInfoData: [],
+    vitamins: []
 }
 
 export const inventoryStore: Reducer<any, any> = (state: any = {}, action: any = {}) => {
@@ -39,7 +40,6 @@ export const inventoryStore: Reducer<any, any> = (state: any = {}, action: any =
                 status: actionTypes.VITAMIN_REQUEST_STATUS.LOADING
             }
         case actionTypes.LOAD_NUTRITION_INFO_SUCCESS:
-            console.log('SAMANTHA GARMON WILL BE MY WIFE', action)
             return {
                 ...state,
                 nutritionInfoData: action.inventoryState.nutritionFactsByInventoryId,
@@ -57,9 +57,22 @@ export const inventoryStore: Reducer<any, any> = (state: any = {}, action: any =
                 inventory: action.inventoryState.inventory,
                 status: actionTypes.REQUEST_STATUS.SUCCESS
             };
+        case actionTypes.LOAD_VITAMINS:
+            return {
+                ...state,
+                vitamins: [],
+                status: actionTypes.REQUEST_STATUS.LOADING
+            };
+        case actionTypes.LOAD_VITAMINS_SUCCESS:
+            return {
+                ...state,
+                vitamins: action.inventoryState.vitamins,
+                status: actionTypes.REQUEST_STATUS.SUCCESS
+            };
         case actionTypes.CONSUME_INVENTORY_FAILURE:
         case actionTypes.ADD_INVENTORY_FAILURE:
         case actionTypes.LOAD_INVENTORY_FAILURE:
+        case actionTypes.LOAD_VITAMINS_FAILURE:
             return {
                 error: action.err,
                 status: actionTypes.REQUEST_STATUS.ERROR

@@ -46,7 +46,7 @@ function Header() {
                         <Route path='/' exact>
                             <Components.ConnectedInventoryData />
                         </Route>
-                        <Route path='/nutritionFacts/:inventoryName'>
+                        <Route path='/nutritionFacts/:inventoryId'>
                             <Components.ConnectedNutritionInfoForInventoryItem />
                         </Route>
                     </Switch>

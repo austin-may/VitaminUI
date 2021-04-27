@@ -11,6 +11,7 @@ export async function getInventoryAsync(): Promise<any> {
             query: `
                 query getInventory {
                     inventory {
+                        InventoryId,
                         Name,
                         Price,
                         Count,
@@ -86,6 +87,23 @@ export async function loadNutritionInfoByInventoryIdAsync(inventoryId: number): 
         variables: {
             inventoryId
         }
+    }).then(result => {
+        console.log(result);
+        return result.data.data
+    })
+}
+
+export async function loadVitamins(): Promise<any> {
+    const axios = require('axios');
+    return await axios.post('http://localhost:43341/query', {
+        query: `
+            query GetVitamins {
+                vitamins {
+                    VitaminId,
+                    VitaminType
+                }
+            }
+            `
     }).then(result => {
         console.log(result);
         return result.data.data
