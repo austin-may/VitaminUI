@@ -137,19 +137,21 @@ const InventoryForm = ({ props }) => {
     )
 }
 
-const VitaminForm = ({ props }) => {
+function VitaminForm({ props }: any & { inventoryId: number }) {
 
-    console.log('vitaminForm', props);
+    console.log('vitaminForm', props.props);
+    console.log('inventoryId', props.inventoryId);
+
 
     useEffect(() => {
-        props.loadVitamins();
+        props.props.loadVitamins();
     }, [])
 
-    const { loadVitamins, vitamins } = props;
+    const { loadVitamins, vitamins } = props.props;
 
-    const isLoading = props.status === actionTypes.REQUEST_STATUS.LOADING;
-    const isSuccess = props.status === actionTypes.REQUEST_STATUS.SUCCESS;
-    const isError = props.status === actionTypes.REQUEST_STATUS.ERROR;
+    const isLoading = props.props.status === actionTypes.REQUEST_STATUS.LOADING;
+    const isSuccess = props.props.status === actionTypes.REQUEST_STATUS.SUCCESS;
+    const isError = props.props.status === actionTypes.REQUEST_STATUS.ERROR;
 
     const FormContainer = styled.div`
     height: 550px;
@@ -176,11 +178,17 @@ const VitaminForm = ({ props }) => {
         },
     })(Button);
 
-    let Name: string | null = '';
     function handleSubmit(event) {
+        console.log('handleSubmit:', event);
         event.preventDefault();
-        const formData = new FormData(event.target as HTMLFormElement);
+        const formData = new FormData(event.target);
+        console.log('vitaminFormData:', formData);
 
+        // const vitaminContent = formData.filter(x => x.value !== '').map((y: any) => {
+        //     return { ...y.id, ...y.value }
+        // });
+        // const suppliedVitamins = { ...props.inventoryId, vitaminContent }
+        // console.log('suppliedVitamin', suppliedVitamins);
         //if (!formIsValid()) return;
     }
 
@@ -190,6 +198,7 @@ const VitaminForm = ({ props }) => {
             {isSuccess && <FormContainer>
                 {vitamins.map(x => {
                     return <TextField type='text'
+                        id={x.VitaminId}
                         name={x.VitaminType}
                         label={x.VitaminType}
                         variant="outlined" />
@@ -367,6 +376,8 @@ export const NutritionFacts = (props) => {
     //Will need an api to GET
     //And another one to ADD
     const history = useHistory();
+    const { location } = history;
+
     return (
         <Container maxWidth="md">
             <Button onClick={() => history.goBack()}>Back</Button>
@@ -383,7 +394,7 @@ export const NutritionFacts = (props) => {
 
             </NutritionFactsContainer>
             <Button onClick={() => setOpenNutritionDialog(true)}>Add nutrition facts</Button>
-            <VitaminDialog open={openNutritionDialog} props={props}></VitaminDialog>
+            <VitaminDialog open={openNutritionDialog} inventoryId={inventoryId} props={props}></VitaminDialog>
         </Container>
 
     )
@@ -392,7 +403,7 @@ export const NutritionFacts = (props) => {
 const VitaminDialog = (props) => {
     return (
         <Dialog open={props.open}>
-            <VitaminForm props={props.props} />
+            <VitaminForm inventoryId={props.inventoryId} props={props} />
         </Dialog>
     )
 }
