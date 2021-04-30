@@ -109,3 +109,21 @@ export async function loadVitamins(): Promise<any> {
         return result.data.data
     })
 }
+
+
+export async function supplyVitaminToInventory(suppliedVitamin): Promise<any> {
+    const axios = require('axios');
+    return await axios.post('http://localhost:43341/query', {
+        query: `
+                mutation supplyVitamin($suppliedVitamin: SuppliedVitamin!) {
+                    supplyVitamin(input: $suppliedVitamin)
+                }
+            `,
+        variables: {
+            suppliedVitamin
+        }
+    }).then(result => {
+        console.log(result);
+        return result.data.data
+    })
+}

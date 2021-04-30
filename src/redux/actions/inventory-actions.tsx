@@ -1,7 +1,7 @@
 import * as actionTypes from './actionTypes';
 import * as inventoryApi from '../../api/inventory-api';
 import { store } from 'react-notifications-component';
-import { InventoryConsumed, InventoryItem } from '../../models/inventory-models';
+import { InventoryConsumed, InventoryItem, SuppliedVitaminData } from '../../models/inventory-models';
 
 const initialInventoryState = { Name: '', Count: 0 }
 
@@ -44,6 +44,14 @@ export function loadVitaminSuccess(inventoryState) {
 
 export function loadVitaminError(err) {
     return { type: actionTypes.LOAD_VITAMINS_FAILURE, err }
+}
+
+export function supplyVitaminSuccess(inventoryState) {
+    return { type: actionTypes.SUPPLY_VITAMIN_DATA_SUCCESS, inventoryState }
+}
+
+export function supplyVitaminError(err) {
+    return { type: actionTypes.SUPPLY_VITAMIN_DATA_FAILURE, err }
 }
 
 
@@ -142,6 +150,19 @@ export function loadVitamins() {
         try {
             dispatch({ type: actionTypes.LOAD_INVENTORY, inventoryState: {} });
             const result = await inventoryApi.loadVitamins();
+            dispatch(loadVitaminSuccess(result));
+        } catch (err) {
+            dispatch(loadVitaminError(err))
+        }
+    }
+}
+
+export function supplyVitaminData(vitaminData: SuppliedVitaminData) {
+    return async function (dispatch) {
+        try {
+            dispatch({ type: actionTypes.SUPPLY_VITAMIN_DATA, inventoryState: {} });
+            const result = await inventoryApi.supplyVitaminToInventory(vitaminData);
+            console.log('lehhhhhhhhhhh go!', result);
             dispatch(loadVitaminSuccess(result));
         } catch (err) {
             dispatch(loadVitaminError(err))

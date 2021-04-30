@@ -18,3 +18,13 @@ export interface InventoryConsumed {
     Amount: string,
     Measurement: string
 }
+
+export interface SuppliedVitaminData {
+    InventoryId: number,
+    VitaminContent: VitaminContent
+}
+
+interface VitaminContent {
+    VitaminId: number,
+    PercentDailyValue: number
+}

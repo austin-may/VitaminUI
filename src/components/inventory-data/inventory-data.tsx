@@ -149,6 +149,8 @@ function VitaminForm({ props }: any & { inventoryId: number }) {
 
     const { loadVitamins, vitamins } = props.props;
 
+    console.log('vitaminssss: ', vitamins);
+
     const isLoading = props.props.status === actionTypes.REQUEST_STATUS.LOADING;
     const isSuccess = props.props.status === actionTypes.REQUEST_STATUS.SUCCESS;
     const isError = props.props.status === actionTypes.REQUEST_STATUS.ERROR;
@@ -182,14 +184,18 @@ function VitaminForm({ props }: any & { inventoryId: number }) {
         console.log('handleSubmit:', event);
         event.preventDefault();
         const formData = new FormData(event.target);
-        console.log('vitaminFormData:', formData);
+        console.log('vitaminFormData:', document.getElementsByName('A')[0].id);
+        let vitaminIDsWithPercentages: any = [];
+        formData.forEach((percentDailyValue, vitaminType) => {
+            if (percentDailyValue) {
+                console.log(document.getElementsByName(vitaminType.toString())[0].id, percentDailyValue);
+                vitaminIDsWithPercentages = [...vitaminIDsWithPercentages, { VitaminId: +document.getElementsByName(vitaminType.toString())[0].id, PercentDailyValue: +percentDailyValue }];
+            }
+        });
 
-        // const vitaminContent = formData.filter(x => x.value !== '').map((y: any) => {
-        //     return { ...y.id, ...y.value }
-        // });
-        // const suppliedVitamins = { ...props.inventoryId, vitaminContent }
-        // console.log('suppliedVitamin', suppliedVitamins);
-        //if (!formIsValid()) return;
+        const suppliedVitamin = { InventoryId: +props.inventoryId, VitaminContent: [...vitaminIDsWithPercentages] };
+        console.log('cmonSuppliedVitamin', suppliedVitamin);
+        props.props.supplyVitaminData(suppliedVitamin);
     }
 
     return (
@@ -424,7 +430,8 @@ const mapDispatchToProps = {
     addInventory: inventoryActions.addInventory,
     loadNutritionInfo: inventoryActions.loadNutritionInfo,
     loadVitamins: inventoryActions.loadVitamins,
-    setSite: inventoryActions.setSite
+    setSite: inventoryActions.setSite,
+    supplyVitaminData: inventoryActions.supplyVitaminData
 }
 
 export default {
